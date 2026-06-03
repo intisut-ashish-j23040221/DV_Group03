@@ -1,0 +1,156 @@
+body {
+    font-family: sans-serif;
+}
+
+/* make the width sizing include the padding and border */
+* {
+	box-sizing: border-box;
+}
+
+/* set the default style for the webpage */
+body {
+	margin: 0;
+	color: var(--black);
+	font-family: sans-serif;
+	line-height: 1.6;
+	background: var(--yellow-bg);
+}
+
+h1,
+h2 {
+	margin-top: 0;
+	font-family: "Rockwell", "Georgia", serif;
+}
+
+.site-header {
+	position: sticky; /*make the header always stay at the top when scrolling */
+	top: 0;
+	display: flex; 
+	align-items: center; /*align the items at the same height position*/
+	justify-content: space-between; /*so the logo placed -> left and navigation -> right */
+	padding: 0.8rem 1.4rem; /*give some space for the logo and navigation bar, to make it not too close to the edge  */
+	background: var(--white);
+	border-bottom: 2px solid var(--brown);
+}
+
+.logo-button {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.65rem; /* add space between the logo and the text */
+	color: inherit;
+	text-decoration: none;  /* remove url line */
+	font-weight: 700;
+	border-radius: 999px; /* the border is a circle, which be shown when hover at the Logo or its text */
+	padding: 0.25rem 0.75rem 0.25rem 0.25rem; 
+	transition: transform 0.2s ease, background-color 0.2s ease; /* timer of the animation */
+}
+
+.logo-button img {
+	width: 42px;
+	height: 42px;
+	object-fit: contain; /* To make the image is fit nicely in the defined container */
+}
+
+.logo-button:hover,
+.logo-button:focus-visible {
+	transform: translateY(-1px); /* make a going up animation when hover or focus on the logo */
+	background-color: var(--yellow);
+	outline: none;
+}
+
+.top-nav {
+	flex-shrink: 0; /* prevent the nav bar from compressing when screen size is small*/
+}	
+
+.nav-menu {
+	list-style: none; /* remove the default bullet points from the list */
+	display: flex;
+	gap: 0.5rem;
+	margin: 0;
+	padding: 0;
+}
+
+.nav-link {
+	display: inline-block; /* It make the nav link is align horizontally with custom padding and border*/
+	color: var(--black);
+	text-decoration: none;
+	font-weight: 700;
+	padding: 0.45rem 0.8rem;
+	border-radius: 999px;
+	border: 1px solid var(--brown);
+	transition: all 0.2s ease;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+	background-color: var(--yellow);
+	transform: translateY(-1px);
+	outline: none; /* If the user use TAB key and hover on the nav link, use our custom focus style instead of the default one*/
+}
+
+.nav-link.is-active {
+	background-color: var(--dark-yellow);
+	border-color: var(--brown);
+	box-shadow: inset 0 -2px 0 var(--brown); /* add a shadow at the bottom of nav link for current active page */
+}
+
+.page-content {
+	max-width: 1080px; /*set a max width for the content */
+	margin: 0 auto; /* centre the content horizontally automatically */
+	padding: 2rem 1rem 2.5rem;
+}
+
+/* 
+Add the style to make the SVG container responsive
+-> it will adjust based on the screen size */
+.responsive-svg-container {
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
+    max-width: 1200px;
+}
+
+/* KPI styles */
+.kpi-row{
+	display:flex;
+	gap:20px;
+	align-items:stretch;
+	margin:18px 0 28px 0;
+}
+.kpi-main{flex:1}
+.kpi-main-card{
+	background:#0f2a45;
+	color:#fff;
+	padding:18px 22px;
+	border-radius:6px;
+}
+.kpi-value{
+	font-size:34px;
+	font-weight:700;
+	line-height:1;
+}
+.kpi-sub{font-size:14px;margin-top:6px;opacity:0.9}
+.kpi-cards{display:flex;gap:14px;min-width:420px}
+.kpi-card{background:#082443;color:#fff;padding:14px;border-radius:6px;flex:0 0 200px}
+.kpi-card-value{font-size:20px;font-weight:700}
+.kpi-card-label{font-size:13px;opacity:0.95}
+.kpi-card-small{font-size:18px;font-weight:700;margin-bottom:2px}
+.kpi-card-sub{font-size:12px;opacity:0.9;margin-bottom:8px}
+.kpi-trend,.kpi-card-trend{margin-top:10px;font-size:13px;font-weight:700;letter-spacing:0.2px}
+.kpi-change--up{color:#ff5252}
+.kpi-change--down{color:#66bb6a}
+.kpi-change--flat{color:#455a64}
+
+/* Responsive tweaks */
+@media (max-width:800px){
+	.kpi-row{flex-direction:column}
+	.kpi-cards{flex-wrap:wrap;min-width:0}
+}
+
+/* filter controls */
+.filters{display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.filters label{font-size:13px;background:#fff;padding:6px 8px;border:1px solid #ddd;border-radius:4px}
+.filters select{border:none;background:transparent;font-size:14px}
+.btn-reset{background:#222;color:#fff;border:none;padding:8px 12px;border-radius:4px;cursor:pointer}
+
+

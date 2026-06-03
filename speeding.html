@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+    <header class="site-header">
+        <a class="logo-button" href="index.html" aria-label="Go to Home page">
+            <img src="./images/logo.svg" alt="Police Enforcement logo">
+            <span>Police Enforcement</span>
+        </a>
+        <nav class="top-nav" aria-label="Main navigation">
+            <ul class="nav-menu">
+                <li><a class="nav-link" href="index.html">Home</a></li>
+                <li><a class="nav-link" href="televisions.html">Random Breath Test</a></li>
+                <li><a class="nav-link" href="drug_tests.html">Drug Tests</a></li>
+                <li><a class="nav-link" href="mobile_phone.html">Mobile Phone</a></li>
+                <li><a class="nav-link" href="speeding.html">Speeding</a></li>
+                <li><a class="nav-link" href="non_wearing_seatbelts.html">Non-wearing Seatbelts</a></li>
+                <li><a class="nav-link" href="unlicensed_driving.html">Unlicensed Driving</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="page-content">
+        <section class="filters-row">
+            <div class="filters" id="filters-controls">
+                <label>Year: <select id="filter-year"></select></label>
+                <label>Jurisdiction: <select id="filter-jurisdiction"></select></label>
+                <label>Metric: <select id="filter-metric"></select></label>
+                <button id="filter-reset" class="btn-reset">Reset View</button>
+            </div>
+        </section>
+
+        <section class="kpi-row">
+            <div class="kpi-main" id="kpi-main"></div>
+            <div class="kpi-cards" id="kpi-cards"></div>
+        </section>
+
+        <section class="chart-block chart-block--centered">
+            <h2>States with the Highest Speeding Fines in Australia</h2>
+            <div id="jurisdiction-speeding-bar" class="responsive-svg-container"></div>
+
+            <h2>Camera Types Capturing the Highest Speeding Fines</h2>
+            <div id="camera-speeding-bar" class="responsive-svg-container"></div>
+
+            <h2>Fines Trend Over Time</h2>
+            <div id="fines-line-chart" class="responsive-svg-container"></div>
+
+            <h2>Fines by Location (Stacked by Detection Method)</h2>
+            <div id="location-stacked-bar" class="responsive-svg-container"></div>
+
+            <h2>Heatmap: Monthly Fines by Location</h2>
+            <div id="location-heatmap" class="responsive-svg-container"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>(c) <span id="current-year"></span> Group 3 | GenAI acknowledgement: Code and some content were developed with assistance from GitHub Copilot (GPT-5.3-Codex).</p>
+    </footer>
+</body>
+
+<script src="./js/script.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="./js/fines/shared_constants.js"></script>
+<script src="./js/fines/scales.js"></script>
+<script src="./js/fines/filters.js"></script>
+<script src="./js/fines/kpis.js"></script>
+<script src="./js/fines/bar_chart_jurisdiction.js"></script>
+<script src="./js/fines/bar_chart.js"></script>
+<script src="./js/fines/line_chart.js"></script>
+<script src="./js/fines/stacked_bar.js"></script>
+<script src="./js/fines/heatmap.js"></script>
+<script src="./js/fines/histogram.js"></script>
+<script src="./js/fines/legend.js"></script>
+<script src="./js/fines/interactions.js"></script>
+<script src="./js/fines/load_data.js"></script>
+</html>
