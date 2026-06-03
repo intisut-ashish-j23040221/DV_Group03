@@ -1,7 +1,3 @@
-body {
-    font-family: sans-serif;
-}
-
 /* make the width sizing include the padding and border */
 * {
 	box-sizing: border-box;
@@ -14,6 +10,7 @@ body {
 	font-family: sans-serif;
 	line-height: 1.6;
 	background: var(--yellow-bg);
+	font-family: sans-serif;
 }
 
 h1,
@@ -29,8 +26,9 @@ h2 {
 	align-items: center; /*align the items at the same height position*/
 	justify-content: space-between; /*so the logo placed -> left and navigation -> right */
 	padding: 0.8rem 1.4rem; /*give some space for the logo and navigation bar, to make it not too close to the edge  */
-	background: var(--white);
-	border-bottom: 2px solid var(--brown);
+	background-color: #eeffee;
+	border-bottom: 2px solid black;
+	border-radius: 0 0 5px 5px
 }
 
 .logo-button {
