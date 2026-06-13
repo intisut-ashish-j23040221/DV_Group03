@@ -9,7 +9,7 @@ const initFilters = (data, onChange) => {
   const juris = Array.from(new Set(data.map(d => d.jurisdiction))).sort();
   const metrics = Array.from(new Set(data.map(d => d.metric))).sort();
 
-  const makeOptions = (sel, items) => {
+  const makeOptions = (sel, items, isMetric = false) => {
     sel.innerHTML = '';
     
     const allOpt = document.createElement('option'); 
@@ -20,14 +20,14 @@ const initFilters = (data, onChange) => {
     items.forEach(it => { 
       const opt = document.createElement('option'); 
       opt.value = it; 
-      opt.textContent = formatMetricLabel(it); 
+      opt.textContent = isMetric ? it : formatMetricLabel(it); 
       sel.appendChild(opt); 
     });
   };
 
   makeOptions(yearSel, years);
   makeOptions(jurSel, juris);
-  makeOptions(metricSel, metrics);
+  makeOptions(metricSel, metrics, true);
 
   if (metrics.includes('speed_fines')) {
     metricSel.value = 'speed_fines';
