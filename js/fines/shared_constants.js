@@ -14,6 +14,8 @@ const formatMetricLabel = metric => {
 		return 'All metrics';
 	}
 
+	if (typeof metric !== "string") return metric;
+
 	return metric
 		.split('_')
 		.map(part => part.charAt(0).toUpperCase() + part.slice(1))
