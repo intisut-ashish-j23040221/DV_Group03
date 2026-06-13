@@ -141,3 +141,10 @@
 	cursor: pointer;
 }
 
+
+
+/* Group the visual importance here */
+.visual-important {
+	display: flex;
+	flex-direction: column;
+}
