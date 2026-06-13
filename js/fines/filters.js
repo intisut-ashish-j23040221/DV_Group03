@@ -11,8 +11,18 @@ const initFilters = (data, onChange) => {
 
   const makeOptions = (sel, items) => {
     sel.innerHTML = '';
-    const allOpt = document.createElement('option'); allOpt.value='All'; allOpt.text='All'; sel.appendChild(allOpt);
-    items.forEach(it => { const opt = document.createElement('option'); opt.value=it; opt.text=it; sel.appendChild(opt); });
+    
+    const allOpt = document.createElement('option'); 
+    allOpt.value='All'; 
+    allOpt.textContent='All'; 
+
+    sel.appendChild(allOpt);
+    items.forEach(it => { 
+      const opt = document.createElement('option'); 
+      opt.value = it; 
+      opt.textContent = formatMetricLabel(it); 
+      sel.appendChild(opt); 
+    });
   };
 
   makeOptions(yearSel, years);

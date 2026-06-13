@@ -31,7 +31,10 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    chart
+    const chartWL = chart.append("g")
+        .attr("transform", `translate(${-margin.left + 75}, 0)`);
+
+    chartWL
         .selectAll("rect")
         .data(totals)
         .join("rect")
@@ -43,7 +46,7 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .append("title")
         .text(d => `${d.jurisdiction}\n${metricLabel}: ${d.total.toLocaleString()}`);
 
-    chart
+    chartWL
         .selectAll(".bar-label")
         .data(totals)
         .join("text")
@@ -55,22 +58,30 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .style("fill", "#333")
         .text(d => d.total.toLocaleString());
 
-    chart
+    chartWL
         .append("g")
         .call(d3.axisLeft(yScale));
 
-    chart
+    chartWL
         .append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
 
-    chart
+    chartWL
         .append("text")
         .attr("x", innerWidth / 2)
         .attr("y", innerHeight + 44)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text(`Total ${metricLabel.toLowerCase()}`);
+
+    chartWL
+        .append("text")
+        .attr("x", 0)
+        .attr("y", -10)
+        .style("font-size", "13px")
+        .style("font-weight", "600")
+        .text(`States with the highest ${metricLabel.toLowerCase()} in Australia`);
 
     chart
         .append("text")
@@ -80,12 +91,4 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text("Jurisdiction");
-
-    chart
-        .append("text")
-        .attr("x", 0)
-        .attr("y", -10)
-        .style("font-size", "13px")
-        .style("font-weight", "600")
-        .text(`States with the highest ${metricLabel.toLowerCase()} in Australia`);
 };
