@@ -7,7 +7,8 @@
 
 .page-content {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
+	gap: 10px;
 }
 
 /* KPI styles */
@@ -45,7 +46,6 @@
 .kpi-cards {
 	display: flex;
 	gap: 14px;
-	min-width: 420px;
 	flex-direction: column;
 }
 
@@ -147,4 +147,11 @@
 .visual-important {
 	display: flex;
 	flex-direction: column;
+}
+
+
+section.chart-block {
+	display: flex;
+	flex-direction: column;
+	flex-wrap: wrap;
 }
