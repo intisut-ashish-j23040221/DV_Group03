@@ -60,26 +60,31 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
         .append('div')
         .attr('class', 'kpi-main-card')
         .html(`
-            <div class="kpi-value">${totalInfringements.toLocaleString()}</div>
             <div class="kpi-sub">${metricLabel}, ${latestYear}</div>
+            <div class="kpi-value">${totalInfringements.toLocaleString()}</div>
             <div class="kpi-trend ${changeClass}">${changePercent === null ? 'N/A' : `${changeArrow} ${Math.abs(changePercent).toFixed(2)}%`} ${previousYear === null ? 'vs previous year' : `vs ${previousYear}`}</div>
         `);
 
     // Cards: Police fines, Camera fines, Arrests/Charges
     const policeCard = containerCards.append('div').attr('class', 'kpi-card');
     policeCard.html(`
-        <div class="kpi-card-value">${policeFines.toLocaleString()}</div>
         <div class="kpi-card-label">Police fines</div>
+        <div class="kpi-card-value">${policeFines.toLocaleString()}</div>
         <div class="kpi-card-trend ${policeDelta === null ? 'kpi-change--flat' : (policeDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(policeDelta, previousYear)}</div>
     `);
 
     const cameraCard = containerCards.append('div').attr('class', 'kpi-card');
     cameraCard.html(`
-        <div class="kpi-card-value">${cameraFines.toLocaleString()}</div>
         <div class="kpi-card-label">Camera fines</div>
+        <div class="kpi-card-value">${cameraFines.toLocaleString()}</div>
         <div class="kpi-card-trend ${cameraDelta === null ? 'kpi-change--flat' : (cameraDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(cameraDelta, previousYear)}</div>
     `);
 
     const miscCard = containerCards.append('div').attr('class', 'kpi-card');
-    miscCard.html(`<div class="kpi-card-small">${arrests.toLocaleString()}</div><div class="kpi-card-sub">Arrests</div><div class="kpi-card-small">${charges.toLocaleString()}</div><div class="kpi-card-sub">Charges</div>`);
+    miscCard.html(`
+        <div class="kpi-card-sub">Arrests</div>
+        <div class="kpi-card-small">${arrests.toLocaleString()}</div>
+        <div class="kpi-card-sub">Charges</div>
+        <div class="kpi-card-small">${charges.toLocaleString()}</div>
+    `);
 };

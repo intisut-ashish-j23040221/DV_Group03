@@ -93,7 +93,7 @@ h2 {
 }
 
 .page-content {
-	max-width: 1080px; /*set a max width for the content */
-	margin: 0 auto; /* centre the content horizontally automatically */
+	max-width: 100%; /*set a max width for the content */
+	margin: 0; /* centre the content horizontally automatically */
 	padding: 2rem 1rem 2.5rem;
 }

@@ -5,12 +5,18 @@
     max-width: 1200px;
 }
 
+.page-content {
+	display: flex;
+	flex-direction: column;
+}
+
 /* KPI styles */
 .kpi-row {
 	display: flex;
 	gap: 20px;
 	align-items: stretch;
 	margin: 18px 0 28px 0;
+	flex-direction: column;
 }
 
 .kpi-main {
@@ -40,6 +46,7 @@
 	display: flex;
 	gap: 14px;
 	min-width: 420px;
+	flex-direction: column;
 }
 
 .kpi-card {
@@ -106,8 +113,9 @@
 .filters{
 	display: flex;
 	gap: 12px;
-	align-items: center;
+	align-items: stretch;
 	margin-bottom: 8px;
+	flex-direction: column;
 }
 
 .filters label{
@@ -132,6 +140,4 @@
 	border-radius: 4px;
 	cursor: pointer;
 }
-
-
 
