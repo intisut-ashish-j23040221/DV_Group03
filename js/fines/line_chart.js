@@ -35,10 +35,7 @@ const drawFinesLineChart = (data, metric = 'All') => {
 
   // create chart group and move to top-left
   const chart = svg.append("g")
-    .attr("transform", `translate(${margin.left}, ${margin.top})`);
-
-  const chartSecondary = chart.append("g")
-    .attr("transform", `translate(${-margin.left + 75}, 0)`);
+    .attr("transform", `translate(${margin.left},${margin.top})`);
 
   // line generator: converts data points to SVG path
   const lineGenerator = d3.line()
@@ -47,7 +44,7 @@ const drawFinesLineChart = (data, metric = 'All') => {
     .curve(d3.curveMonotoneX); // smooth curve without overshoot
 
   // draw the line path
-  chartSecondary
+  chart
     .append("path")
     .datum(yearlyTotals)
     .attr("fill", "none")
@@ -56,7 +53,7 @@ const drawFinesLineChart = (data, metric = 'All') => {
     .attr("d", lineGenerator);
 
   // draw data points as circles
-  chartSecondary
+  chart
     .selectAll("circle")
     .data(yearlyTotals)
     .join("circle")
@@ -68,21 +65,21 @@ const drawFinesLineChart = (data, metric = 'All') => {
     .text(d => `${d.year}\n${metricLabel}: ${d.total.toLocaleString()}`);
 
   // draw axes
-  chartSecondary
+  chart
     .append("g")
     .attr("transform", `translate(0, ${innerHeight})`)
     .call(d3.axisBottom(xScale).tickFormat(d3.format("d")))
     .selectAll("text")
     .style("font-size", "11px");
 
-  chartSecondary
+  chart
     .append("g")
     .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format("~s")))
     .selectAll("text")
     .style("font-size", "11px");
 
   // x-axis label
-  chartSecondary
+  chart
     .append("text")
     .attr("x", innerWidth / 2)
     .attr("y", innerHeight + 45)
@@ -101,7 +98,7 @@ const drawFinesLineChart = (data, metric = 'All') => {
     .text("Total Fines");
 
   // chart title
-  chartSecondary
+  chart
     .append("text")
     .attr("x", 0)
     .attr("y", -10)

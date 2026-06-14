@@ -1,5 +1,5 @@
 //Load exercise 6 data and call the functions
-d3.csv("data/fines/fines.csv", d => ({
+d3.csv("data/fines.csv", d => ({
     year: +d.YEAR,
     jurisdiction: d.JURISDICTION,
     location: d.LOCATION,
