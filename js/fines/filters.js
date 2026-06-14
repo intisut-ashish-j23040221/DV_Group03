@@ -9,25 +9,15 @@ const initFilters = (data, onChange) => {
   const juris = Array.from(new Set(data.map(d => d.jurisdiction))).sort();
   const metrics = Array.from(new Set(data.map(d => d.metric))).sort();
 
-  const makeOptions = (sel, items, isMetric = false) => {
+  const makeOptions = (sel, items) => {
     sel.innerHTML = '';
-    
-    const allOpt = document.createElement('option'); 
-    allOpt.value='All'; 
-    allOpt.textContent='All'; 
-
-    sel.appendChild(allOpt);
-    items.forEach(it => { 
-      const opt = document.createElement('option'); 
-      opt.value = it; 
-      opt.textContent = isMetric ? it : formatMetricLabel(it); 
-      sel.appendChild(opt); 
-    });
+    const allOpt = document.createElement('option'); allOpt.value='All'; allOpt.text='All'; sel.appendChild(allOpt);
+    items.forEach(it => { const opt = document.createElement('option'); opt.value=it; opt.text=it; sel.appendChild(opt); });
   };
 
   makeOptions(yearSel, years);
   makeOptions(jurSel, juris);
-  makeOptions(metricSel, metrics, true);
+  makeOptions(metricSel, metrics);
 
   if (metrics.includes('speed_fines')) {
     metricSel.value = 'speed_fines';

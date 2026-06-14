@@ -1,17 +1,116 @@
-.responsive-svg-container {
-    margin-right: auto;
-    margin-left: auto;
-    width: 100%;
-    max-width: 1200px;
+html,
+body {
+	height: 100%;
+	margin: 0;
+	transform-origin: top center;
 }
 
 .page-content {
 	display: flex;
 	flex-direction: row;
-	gap: 10px;
+	flex-wrap: wrap;
+	gap: 16px;
+	padding: 12px 14px 12px;
 }
 
-/* KPI styles */
+.page-content > section {
+	flex-grow: 1;
+}
+
+.dashboard-sidebar {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-width: 280px;
+	align-self: start;
+	overflow: visible;
+	max-height: none;
+}
+
+.dashboard-main {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	min-height: 0;
+	overflow: visible;
+}
+.sidebar-panel {
+	background: #ffffff;
+	border-radius: 12px;
+	box-shadow: 0 8px 20px rgba(6, 47, 86, 0.08);
+	padding: 16px;
+	min-height: auto;
+	flex-shrink: 0;
+}
+
+.sidebar-panel h2 {
+	font-size: 16px;
+	margin: 0 0 12px 0;
+	color: #062f56;
+}
+
+.sidebar-panel--filters {
+	min-height: auto;
+}
+
+.sidebar-panel--kpis {
+	min-height: auto;
+	max-height: none;
+	overflow: visible;
+}
+
+.chart-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	grid-template-rows: minmax(420px, 0.9fr) minmax(400px, 0.7fr);
+	gap: 18px;
+	min-height: 0;
+	height: auto;
+}
+
+.chart-panel {
+	background: #ffffff;
+	border-radius: 10px;
+	box-shadow: 0 6px 18px rgba(15, 42, 69, 0.08);
+	padding: 18px;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	height: auto;
+	overflow: visible;
+}
+
+.chart-panel--large {
+	grid-column: 1 / span 2;
+	min-height: 420px;
+	height: auto;
+}
+
+.chart-panel--medium {
+	min-height: 380px;
+	height: auto;
+}
+
+.chart-panel__header {
+	margin-bottom: 8px;
+	flex-shrink: 0;
+}
+
+.chart-panel__header h2 {
+	font-size: 14px;
+	margin: 0;
+	color: #062f56;
+	font-weight: 600;
+}
+
+.chart-block {
+	display: grid;
+	flex-grow: 1;
+	grid-template-columns: repeat(auto-fill, minmax(max(200px, 49%), 1fr));
+	gap: 2px;
+}
+
+
 .kpi-row {
 	display: flex;
 	gap: 20px;
@@ -31,7 +130,7 @@
 	border-radius: 6px;
 }
 
-.kpi-value{
+.kpi-value {
 	font-size: 34px;
 	font-weight: 700;
 	line-height: 1;
@@ -78,7 +177,8 @@
 	margin-bottom: 8px;
 }
 
-.kpi-trend,.kpi-card-trend {
+.kpi-trend,
+.kpi-card-trend {
 	margin-top: 10px;
 	font-size: 13px;
 	font-weight: 700;
@@ -97,7 +197,78 @@
 	color: #455a64;
 }
 
-/* Responsive tweaks */
+.filters {
+	display: flex;
+	gap: 12px;
+	align-items: stretch;
+	margin-bottom: 8px;
+	flex-direction: column;
+}
+
+.filters label {
+	font-size: 13px;
+	background: #fff;
+	padding: 6px 8px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+}
+
+.filters select {
+	border: none;
+	background: transparent;
+	font-size: 14px;
+	margin-top: 4px;
+}
+
+.btn-reset {
+	width: 100%;
+	text-align: center;
+	background: #222;
+	color: #fff;
+	border: none;
+	padding: 8px 10px;
+	border-radius: 8px;
+	cursor: pointer;
+	font-size: 12px;
+}
+
+.responsive-svg-container {
+	margin-right: auto;
+	margin-left: auto;
+	width: 100%;
+	max-width: 100%;
+	min-height: 380px;
+	height: auto;
+	flex: 1;
+	overflow: visible;
+}
+
+#breath-trend-line.responsive-svg-container {
+	min-height: 380px;
+	max-height: none;
+}
+
+.responsive-svg-container svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+@media (max-width:1200px) {
+	.page-content {
+		grid-template-columns: 1fr;
+	}
+
+	.dashboard-sidebar,
+	.dashboard-main {
+		min-width: 0;
+	}
+
+	.chart-grid {
+		grid-template-columns: 1fr;
+	}
+}
+
 @media (max-width:800px){
 	.kpi-row { 
 		flex-direction: column;
@@ -106,56 +277,7 @@
 		flex-wrap: wrap;
 		min-width: 0
 	}
-}
-
-/* filter controls */
-.filters{
-	display: flex;
-	gap: 12px;
-	align-items: stretch;
-	margin-bottom: 8px;
-	flex-direction: column;
-}
-
-.filters label{
-	font-size: 13px;
-	background: #fff;
-	padding: 6px 8px;
-	border: 1px solid #ddd;
-	border-radius: 4px;
-}
-
-.filters select{
-	border: none;
-	background: transparent;
-	font-size: 14px;
-}
-
-.btn-reset{
-	background: #222;
-	color: #fff;
-	border: none;
-	padding: 8px 12px;
-	border-radius: 4px;
-	cursor: pointer;
-}
-
-
-
-/* Group the visual importance here */
-.visual-important {
-	display: flex;
-	flex-direction: column;
-}
-
-
-section.chart-block {
-	display: grid;
-	flex-grow: 1;
-	grid-template-columns: repeat(auto-fill, minmax(max(200px, 49%), 1fr));
-	gap: 2px;
-}
-
-section.chart-block h2 {
-	font-size: 20px;
+	.chart-grid {
+		grid-template-columns: 1fr;
+	}
 }
