@@ -10,6 +10,8 @@ const drawLocationHeatmap = data => {
     const monthDomain = d3.range(1, 13);
     const locationDomain = Array.from(new Set(data.map(d => d.location))).sort(d3.ascending);
 
+    locationDomain.shift();
+
     const finesByCell = new Map();
 
     data.forEach(d => {

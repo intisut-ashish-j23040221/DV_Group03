@@ -59,7 +59,10 @@ const drawLocationStackedBar = data => {
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    chart
+    const secondaryChart = chart.append("g")
+        .attr("transform", `translate(${-margin.left + 75}, 0)`);
+
+    secondaryChart
         .append("g")
         .selectAll("g")
         .data(layers)
@@ -94,7 +97,7 @@ const drawLocationStackedBar = data => {
         ].join("\n");
     };
 
-    chart
+    secondaryChart
         .append("g")
         .selectAll("rect")
         .data(chartData)
@@ -107,7 +110,7 @@ const drawLocationStackedBar = data => {
         .append("title")
         .text(d => locationTooltipText(d));
 
-    chart
+    secondaryChart
         .append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(xScale))
@@ -117,11 +120,11 @@ const drawLocationStackedBar = data => {
         .attr("dy", "0.15em")
         .attr("transform", "rotate(-30)");
 
-    chart
+    secondaryChart
         .append("g")
         .call(d3.axisLeft(yScale).ticks(8).tickFormat(d3.format("~s")));
 
-    chart
+    secondaryChart
         .append("text")
         .attr("x", innerWidth / 2)
         .attr("y", innerHeight + 95)
@@ -138,7 +141,7 @@ const drawLocationStackedBar = data => {
         .style("font-size", "12px")
         .text("Total Fines");
 
-    const legend = chart
+    const legend = secondaryChart
         .append("g")
         .attr("transform", `translate(${innerWidth + 20}, 10)`);
 
