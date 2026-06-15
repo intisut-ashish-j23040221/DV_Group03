@@ -21,7 +21,8 @@ const drawBreathTrendStackedBar = (data) => {
     if (chartData.length === 0) return;
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
-    const currentInnerWidth = containerWidth - margin.left - margin.right;
+    // Increase right margin to 80 to make sure the right Y axis labels fit
+    const currentInnerWidth = containerWidth - margin.left - 80; 
     const w = Math.max(currentInnerWidth, 400);
 
     const svg = container
@@ -55,7 +56,13 @@ const drawBreathTrendStackedBar = (data) => {
             yScale.domain([0, d3.max(chartData, d => d.other) || 10]);
             yScalePositive.domain([0, d3.max(chartData, d => d.positive) || 10]);
             yAxisGroup.style("opacity", 1).call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")));
-            yAxisPositiveGroup.style("opacity", 1).call(d3.axisRight(yScalePositive).ticks(6).tickFormat(d3.format(".2s")));
+            
+            yAxisPositiveGroup.style("opacity", 1)
+                .call(d3.axisRight(yScalePositive).ticks(6).tickFormat(d3.format(".2s")));
+            
+            // Style right axis: #333 for text, Black for lines to link to data
+            yAxisPositiveGroup.selectAll("text").style("fill", "#333").style("font-weight", "bold");
+            yAxisPositiveGroup.selectAll("line, path").style("stroke", "#000000");
         }
         
         yAxisGroup.selectAll("text").style("font-size", "12px");
@@ -164,10 +171,11 @@ const drawBreathTrendStackedBar = (data) => {
         .attr("class", "y-label-right")
         .attr("transform", "rotate(90)")
         .attr("x", innerHeight / 2)
-        .attr("y", -w - 60)
+        .attr("y", -w - 55) // Pushed labels further out to clear axis
         .attr("text-anchor", "middle")
         .style("font-size", "13px")
-        .style("fill", "#D32F2F")
+        .style("font-weight", "bold")
+        .style("fill", "#333")
         .text("Positive Cases");
 
     const tooltip = chart
@@ -200,10 +208,8 @@ const drawBreathTrendStackedBar = (data) => {
         const rect = d3.select(e.currentTarget);
         tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
         
-        // Find center of the year's band
         const barX = xScale(d.year) + xScale.bandwidth() / 2;
         
-        // Determine Y based on which element was hovered
         let barY;
         if (e.currentTarget.tagName === 'circle') {
              const showOther = !activeLegendKey || activeLegendKey === 'other';
@@ -257,7 +263,7 @@ const drawBreathTrendStackedBar = (data) => {
     positiveDots.on("mouseenter", handleHover).on("mouseleave", () => tooltip.style("opacity", 0));
 
     const legend = chart.append("g")
-        .attr("transform", `translate(${w / 2 - 100}, ${innerHeight + 40})`);
+        .attr("transform", `translate(${w / 2 - 120}, ${innerHeight + 40})`);
 
     const legendItems = [
         { key: 'positive', label: 'Positive (Line)', color: "#D32F2F", type: 'line' },
