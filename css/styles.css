@@ -34,18 +34,17 @@ h2 {
 .logo-button {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.65rem; /* add space between the logo and the text */
 	color: inherit;
 	text-decoration: none;  /* remove url line */
 	font-weight: 700;
 	border-radius: 999px; /* the border is a circle, which be shown when hover at the Logo or its text */
-	padding: 0.25rem 0.75rem 0.25rem 0.25rem; 
+	padding: 0.2rem; 
 	transition: transform 0.2s ease, background-color 0.2s ease; /* timer of the animation */
 }
 
 .logo-button img {
-	width: 42px;
-	height: 42px;
+	width: 400px; /* increased to 72px */
+	height: 100px; /* increased to 72px */
 	object-fit: contain; /* To make the image is fit nicely in the defined container */
 }
 
