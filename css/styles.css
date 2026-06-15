@@ -43,8 +43,8 @@ h2 {
 }
 
 .logo-button img {
-	width: 400px; /* increased to 72px */
-	height: 100px; /* increased to 72px */
+	width: 64px; /* fixed from oversized values */
+	height: 64px;
 	object-fit: contain; /* To make the image is fit nicely in the defined container */
 }
 
@@ -94,7 +94,7 @@ h2 {
 .page-content {
 	max-width: 100%; /*set a max width for the content */
 	margin: 0; /* centre the content horizontally automatically */
-	padding: 2rem 1rem 2.5rem;
+	padding: 1rem 1rem 1.5rem;
 }
 
 /* Home Page Styles */
@@ -103,42 +103,42 @@ h2 {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - 200px);
+    min-height: calc(100vh - 120px);
     text-align: center;
-    padding: 2rem;
+    padding: 1rem;
 }
 
 .welcome-container {
     background: white;
-    padding: 3.5rem;
+    padding: 2.5rem;
     border-radius: 20px;
     box-shadow: 0 12px 40px rgba(6, 47, 86, 0.12);
-    max-width: 850px;
+    max-width: 750px;
     width: 100%;
-    margin-bottom: 2.5rem;
+    margin-bottom: 2rem;
     border: 1px solid #ebedf0;
 }
 
 .welcome-container h1 {
-    font-size: 3rem;
+    font-size: 2.2rem;
     color: #062f56;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-family: "Rockwell", "Georgia", serif;
 }
 
 .welcome-container p {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     color: #4a5568;
-    line-height: 1.8;
+    line-height: 1.6;
     margin-bottom: 0;
 }
 
 .btn-first-time {
     background: #062f56;
     color: white;
-    padding: 1.2rem 2.8rem;
+    padding: 1rem 2.2rem;
     border-radius: 50px;
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 700;
     text-decoration: none;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
