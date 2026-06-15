@@ -82,7 +82,7 @@
     chart.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -42)
+        .attr("y", -57)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text("Positive cases");
@@ -195,33 +195,6 @@
                 .attr("transform", "translate(0, 500)")
                 .style("z-index", 100);
         });
-
-    chart.append("g")
-        .attr("transform", `translate(0,${innerHeight})`)
-        .call(d3.axisBottom(xScale))
-        .selectAll("text")
-        .style("font-size", "12px")
-        .attr("text-anchor", "middle");
-
-    chart.append("g")
-        .call(d3.axisLeft(yScale).ticks(5))
-        .selectAll("text")
-        .style("font-size", "12px");
-
-    chart.append("text")
-        .attr("x", w / 2)
-        .attr("y", innerHeight + 40)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text("Jurisdiction");
-
-    chart.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -innerHeight / 2)
-        .attr("y", -42)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text("Positive cases");
 
     addDataTableContextMenu(container.node(),
         () => jurisdictionData.map(d => ({

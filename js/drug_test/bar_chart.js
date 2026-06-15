@@ -62,7 +62,7 @@
     chart.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -42)
+        .attr("y", -52)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#333")
