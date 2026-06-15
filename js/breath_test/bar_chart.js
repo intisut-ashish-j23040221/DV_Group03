@@ -168,7 +168,7 @@
         .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
         .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
         .on("keydown", (e) => createDataPointMovement(e, chart))
-        .on("click", () => syncClicksBetweenDPs(e, chart));
+        .on("click", (e) => syncClicksBetweenDPs(e, chart));
 
     chart.selectAll(".label")
         .data(totals)

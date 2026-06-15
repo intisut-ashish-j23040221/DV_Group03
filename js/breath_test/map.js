@@ -98,28 +98,37 @@ const drawPositiveBreathBar = async (data) => {
         .style("box-shadow", "0 4px 10px rgba(0,0,0,0.1)")
         .style("z-index", "10001");
 
-    states
-        .on("mouseover", function(e, d) {
-            const jurCode = jurMap[d.properties.STATE_NAME];
-            const dData = jurisdictionData.find(j => j.jurisdiction === jurCode);
-            if (!dData) return;
+    const handleHover = (e, d) => {
+        const jurCode = jurMap[d.properties.STATE_NAME];
+        const dData = jurisdictionData.find(j => j.jurisdiction === jurCode);
+        if (!dData) return;
 
-            d3.select(this).attr("stroke", "#333").attr("stroke-width", "2px");
-            
-            tooltip.html(`
-                <strong style="color:#EBA746">${d.properties.STATE_NAME}</strong><br/>
-                Positive Cases: ${d3.format(",")(dData.positiveCount)}<br/>
-                Share: ${dData.percentage.toFixed(1)}%
-            `)
-            .style("visibility", "visible");
-        })
+        d3.select(e.currentTarget).attr("stroke", "#333").attr("stroke-width", "2px");
+        
+        tooltip.html(`
+            <strong style="color:#EBA746">${d.properties.STATE_NAME}</strong><br/>
+            Positive Cases: ${d3.format(",")(dData.positiveCount)}<br/>
+            Share: ${dData.percentage.toFixed(1)}%
+        `)
+        .style("visibility", "visible");
+    }
+
+    states
+        .on("mouseover", handleHover)
+        .on("focus", handleHover)
         .on("mousemove", (e) => {
             tooltip.style("top", (e.pageY - 10) + "px").style("left", (e.pageX + 15) + "px");
         })
-        .on("mouseout", function() {
-            d3.select(this).attr("stroke", "#ffffff").attr("stroke-width", "1px");
+        .on("mouseout", (e) => {
+            d3.select(e.currentTarget).attr("stroke", "#ffffff").attr("stroke-width", "1px");
             tooltip.style("visibility", "hidden");
-        });
+        })
+        .on("blur", (e) => {
+            d3.select(e.currentTarget).attr("stroke", "#ffffff").attr("stroke-width", "1px");
+            tooltip.style("visibility", "hidden");
+        })
+        .on("keydown", (e) => createDataPointMovement(e, states))
+        .on("click", (e) => syncClicksBetweenDPs(e, states));
 
     // Legend
     const legendWidth = 120;
