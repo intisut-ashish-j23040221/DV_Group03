@@ -1,6 +1,7 @@
 const drawBreathTrendStackedBar = (data) => {
     const container = d3.select("#breath-trend-line");
     container.html("");
+    container.attr("tabindex", "0")
 
     if (data.length === 0) return;
 
@@ -78,7 +79,8 @@ const drawBreathTrendStackedBar = (data) => {
         .attr("width", xScale.bandwidth())
         .attr("fill", "#004B87")
         .attr("data-year", d => d.year)
-        .attr("data-key", "other");
+        .attr("data-key", "other")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); // keyboard accessible
 
     // Line for "Positive"
     const lineGenerator = d3.line()
@@ -103,7 +105,8 @@ const drawBreathTrendStackedBar = (data) => {
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2)
         .attr("data-year", d => d.year)
-        .attr("data-key", "positive");
+        .attr("data-key", "positive")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); // keyboard accessible
 
     const updateChartVisibility = (key) => {
         const showOther = !key || key === 'other';
@@ -259,8 +262,24 @@ const drawBreathTrendStackedBar = (data) => {
             .style("z-index", 9999);
     };
 
-    bars.on("mouseenter", handleHover).on("mouseleave", () => tooltip.style("opacity", 0));
-    positiveDots.on("mouseenter", handleHover).on("mouseleave", () => tooltip.style("opacity", 0));
+    // Add interactions for both keyboard and normal user
+    bars
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0))
+        .on("blur", () => tooltip.style("opacity", 0))
+        .on("keydown", (e) => createDataPointMovement(e, bars))
+        .on("click", () => syncClicksBetweenDPs(bars));
+
+    positiveDots
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0))
+        .on("blur", () => tooltip.style("opacity", 0))
+        .on("keydown", (e) => createDataPointMovement(e, positiveDots))
+        .on("click", () => syncClicksBetweenDPs(positiveDots));
+
+    
 
     const legend = chart.append("g")
         .attr("transform", `translate(${w / 2 - 120}, ${innerHeight + 40})`);

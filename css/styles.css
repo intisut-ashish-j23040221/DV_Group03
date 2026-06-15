@@ -80,7 +80,7 @@ h2 {
 
 .nav-link:hover,
 .nav-link:focus-visible {
-	background-color: var(--yellow);
+	background-color: #062f56;
 	transform: translateY(-1px);
 	outline: none; /* If the user use TAB key and hover on the nav link, use our custom focus style instead of the default one*/
 }

@@ -223,11 +223,47 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     document.addEventListener('keydown', escHandler);
 };
 
+
+const triggerMenu = (e, dataFn, columnsFn, container, title, explanation, onRowClick) => {
+    const data = dataFn();
+    const columns = columnsFn();
+    showChartDataTable(e, container, data, columns, title, explanation, onRowClick)
+}
+
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
-    container.addEventListener('contextmenu', (e) => {
-        const data = dataFn();
-        const columns = columnsFn();
-        showChartDataTable(e, container, data, columns, title, explanation, onRowClick);
-    });
+    let params = [dataFn, columnsFn, container, title, explanation, onRowClick];
+    container.addEventListener('contextmenu', (e) => triggerMenu(e, ...params));
+    container.addEventListener("keydown", (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null)
 };
+
+const syncClicksBetweenDPs = (dp) => {
+    dp.attr("tabindex", "-1");
+    d3.select(this).attr("tabindex", "0");
+}
+
+const createDataPointMovement = (event, dp) => {
+  const barsArray = dp.nodes();
+  const currentIndex = barsArray.indexOf(this);
+  let nextIndex = currentIndex;
+
+  // 1. NAVIGATION: Arrow Keys
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    nextIndex = (currentIndex + 1) % barsArray.length;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
+  }
+  
+  // If the index changed, rove the tabindex and shift focus
+  if (nextIndex !== currentIndex) {
+    // Set all dp to -1
+    dp.attr("tabindex", "-1");
+    // Set the newly targeted bar to 0
+    d3.select(barsArray[nextIndex]).attr("tabindex", "0");
+    // Focus the new bar
+    barsArray[nextIndex].focus();
+    return; // Exit early
+  }
+}

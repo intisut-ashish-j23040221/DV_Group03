@@ -1,11 +1,11 @@
 const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
     const container = d3.select("#jurisdiction-speeding-bar");
 
-    if (container.empty()) {
+    if (container.empty())
         return;
-    }
 
     container.selectAll("*").remove();
+    container.setAttribute("tabindex", "0")
 
     const metricLabel = formatMetricLabel(metric);
 

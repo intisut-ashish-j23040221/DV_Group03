@@ -4,7 +4,9 @@
         console.warn("Jurisdiction breath bar container not found");
         return;
     }
+
     container.html(""); // Clear previous
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     if (data.length === 0) return;
 
