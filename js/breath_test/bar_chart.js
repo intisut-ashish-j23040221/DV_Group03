@@ -70,7 +70,7 @@
         .style("fill", "#333")
         .text("Jurisdiction");
 
-    chart.selectAll(".bar")
+    const bars = chart.selectAll(".bar")
         .data(totals)
         .enter()
         .append("rect")
@@ -167,8 +167,8 @@
         .on("focus", handleHover)
         .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
         .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
-        .on("keydown", (e) => createDataPointMovement(e, chart))
-        .on("click", (e) => syncClicksBetweenDPs(e, chart));
+        .on("keydown", (e) => createDataPointMovement(e, bars))
+        .on("click", (e) => syncClicksBetweenDPs(e, bars));
 
     chart.selectAll(".label")
         .data(totals)
