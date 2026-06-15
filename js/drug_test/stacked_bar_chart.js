@@ -1,4 +1,4 @@
-const drawDrugTrendStackedBar = (data) => {
+const drawDrugTrendStackedBar = (data, isInt = false) => {
     const container = d3.select("#drug-trend-line");
     container.html("");
 
@@ -21,7 +21,7 @@ const drawDrugTrendStackedBar = (data) => {
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = Math.max(currentInnerWidth, 400);
+    const w = isInt ? height : Math.max(currentInnerWidth, 400);
 
     const svg = container
         .append("svg")
@@ -81,6 +81,7 @@ const drawDrugTrendStackedBar = (data) => {
         .style("font-size", "11px")
         .style("fill", "white")
         .style("pointer-events", "none")
+        .class("text-value-label")
         .text(d => {
             const value = d[1] - d[0];
             return value > 0 ? d3.format(".2s")(value) : "";

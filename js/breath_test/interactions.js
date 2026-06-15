@@ -73,7 +73,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         try {
             sv.setAttribute('width', '100%');
             sv.setAttribute('height', '100%');
-            sv.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            sv.setAttribute('preserveAspectRatio', 'none');
             sv.style.display = 'block';
             sv.style.width = '100%';
             sv.style.height = '100%';

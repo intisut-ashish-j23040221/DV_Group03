@@ -12,6 +12,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         justify-content: center;
         z-index: 1000;
         padding: 16px;
+        width: 50%;
     `;
     
     // Close modal when clicking on overlay background
@@ -68,15 +69,21 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     clone.querySelectorAll('rect, circle').forEach(el => {
         el.style.pointerEvents = 'none';
     });
+    clone.querySelectorAll("g text.text-value-label").forEach(t => t.remove() );
     // Ensure the SVG inside the clone stretches to fill the wrapper
     clone.querySelectorAll('svg').forEach(sv => {
         try {
-            sv.setAttribute('width', '100%');
-            sv.setAttribute('height', '100%');
-            sv.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+            // sv.setAttribute('width', '50%');
+            // sv.setAttribute('height', '100%');
+            sv.setAttribute('preserveAspectRatio', 'none');
             sv.style.display = 'block';
-            sv.style.width = '100%';
             sv.style.height = '100%';
+            sv.style.aspectRatio = "1 / 1";
+            sv.setAttribute('viewBox', `0 0 ${w/2} ${sv.getAttribute('height')}`);
+            sv.querySelectorAll("text").forEach(t => t.remove() )
+            // sv.style.vectorEffect = 'non-scaling-stroke';
+            // sv.style.height = 'auto';
+            window.dispatchEvent(new Event('resize'));
         } catch (e) {}
     });
 
@@ -196,6 +203,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     content.appendChild(leftPane);
     content.appendChild(rightPane);
     modal.appendChild(content);
+    setTimeout(() => { modal.style.cssText = modal.style.cssText.split(";").slice(0, -2).join(";") }, 1100)
     document.body.appendChild(modal);
 
     const escHandler = (e) => {
