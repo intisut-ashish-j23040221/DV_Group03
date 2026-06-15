@@ -269,7 +269,7 @@ const drawBreathTrendStackedBar = (data) => {
         .on("mouseleave", () => tooltip.style("opacity", 0))
         .on("blur", () => tooltip.style("opacity", 0))
         .on("keydown", (e) => createDataPointMovement(e, bars))
-        .on("click", () => syncClicksBetweenDPs(bars));
+        .on("click", () => syncClicksBetweenDPs(e, bars));
 
     positiveDots
         .on("mouseenter", handleHover)
@@ -277,7 +277,7 @@ const drawBreathTrendStackedBar = (data) => {
         .on("mouseleave", () => tooltip.style("opacity", 0))
         .on("blur", () => tooltip.style("opacity", 0))
         .on("keydown", (e) => createDataPointMovement(e, positiveDots))
-        .on("click", () => syncClicksBetweenDPs(positiveDots));
+        .on("click", () => syncClicksBetweenDPs(e, positiveDots));
 
     
 

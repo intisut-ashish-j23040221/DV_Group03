@@ -237,14 +237,15 @@ const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanatio
     container.addEventListener("keydown", (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null)
 };
 
-const syncClicksBetweenDPs = (dp) => {
+const syncClicksBetweenDPs = (e, dp) => {
     dp.attr("tabindex", "-1");
-    d3.select(this).attr("tabindex", "0");
+    d3.select(e.currentTarget).attr("tabindex", "0");
 }
 
 const createDataPointMovement = (event, dp) => {
+  const targetElement = event.currentTarget;
   const barsArray = dp.nodes();
-  const currentIndex = barsArray.indexOf(this);
+  const currentIndex = barsArray.indexOf(targetElement);
   let nextIndex = currentIndex;
 
   // 1. NAVIGATION: Arrow Keys

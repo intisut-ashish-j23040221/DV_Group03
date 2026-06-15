@@ -81,7 +81,8 @@ const drawPositiveBreathBar = async (data) => {
         })
         .attr("stroke", "#ffffff")
         .attr("stroke-width", "1px")
-        .style("cursor", "pointer");
+        .style("cursor", "pointer")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1");
 
     // 6. Tooltip
     const tooltip = d3.select("body").append("div")
