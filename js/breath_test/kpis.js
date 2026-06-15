@@ -68,9 +68,14 @@ const drawKPIs = (data, comparisonData = data) => {
     };
 
     // Main KPI block - follow the same structure as the speeding/fines KPIs
-    const trendHtml = previousYear !== null
-        ? (function(){ return previousTotalConducted === 0 ? 'N/A vs previous year' : `${totalConducted - previousTotalConducted >= 0 ? '▲' : '▼'} ${Math.abs(((totalConducted - previousTotalConducted)/previousTotalConducted)*100).toFixed(2)}% vs ${previousYear}` })()
-        : 'N/A vs previous year';
+    const changeVal = totalConducted - previousTotalConducted;
+    const changePct = previousTotalConducted > 0 ? (changeVal / previousTotalConducted) * 100 : null;
+    const changeClass = changePct === null ? 'kpi-change--flat' : (changePct > 0 ? 'kpi-change--up' : 'kpi-change--down');
+    const changeArrow = changePct === null ? '' : (changePct > 0 ? '▲' : '▼');
+    
+    const trendText = changePct === null 
+        ? 'N/A vs previous year' 
+        : `${changeArrow} ${Math.abs(changePct).toFixed(2)}% vs ${previousYear}`;
 
     // create main card using the same classes as other pages so CSS matches
     containerMain
@@ -79,7 +84,7 @@ const drawKPIs = (data, comparisonData = data) => {
         .html(`
             <div class="kpi-value">${d3.format(",")(totalConducted)}</div>
             <div class="kpi-sub">Random breath tests conducted, ${latestYear}</div>
-            <div class="kpi-trend">${trendHtml}</div>
+            <div class="kpi-trend ${changeClass}">${trendText}</div>
         `);
 
     // Positive rate card on the right
