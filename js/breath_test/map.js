@@ -114,7 +114,7 @@ const drawPositiveBreathBar = async (data) => {
 
         let resp = e.currentTarget.getBoundingClientRect();
 
-        tooltip.style("top", (resp.top + window.scrollY) + "px").style("left", (resp.left + window.scrollY - resp.width) + "px");
+        tooltip.style("top", (resp.top + window.scrollY) + "px").style("left", (resp.left + window.scrollY - tooltip.node().offsetWidth) + "px");
     }
 
     states

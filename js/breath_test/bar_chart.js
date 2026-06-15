@@ -152,8 +152,8 @@
         }
         tooltipY = barY - tooltipHeight / 2;
 
-        tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-        tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+        tooltipX = Math.max(25, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(25, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
 
         tooltip
             .style("opacity", 1)
