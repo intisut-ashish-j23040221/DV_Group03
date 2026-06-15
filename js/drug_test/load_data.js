@@ -75,7 +75,7 @@ Promise.all([
 
         drawKPIs(filtered, comparisonData);
         drawJurisdictionDrugBar(filtered);
-        drawDrugTrendLine(filtered);
+        drawDrugTrendStackedBar(filtered);
         drawPositiveDrugBar(filtered);
     };
 

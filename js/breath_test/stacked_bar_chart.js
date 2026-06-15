@@ -1,4 +1,4 @@
-const drawBreathTrendLine = (data) => {
+const drawBreathTrendStackedBar = (data) => {
     const container = d3.select("#breath-trend-line");
     container.html("");
 
@@ -80,7 +80,8 @@ const drawBreathTrendLine = (data) => {
         .filter(function(d) {
             const pixelHeight = yScale(d[0]) - yScale(d[1]);
             const value = d[1] - d[0];
-            return pixelHeight > 18 && value > 0;
+            const minHeight = d.key === 'positive' ? 26 : 18;
+            return pixelHeight > minHeight && value > 0;
         });
 
     chart.append("g")
@@ -110,19 +111,6 @@ const drawBreathTrendLine = (data) => {
         .style("font-size", "13px")
         .style("fill", "#333")
         .text("Total Breath Tests Conducted");
-
-    chart.append("g")
-        .attr("transform", `translate(${w},0)`)
-        .call(d3.axisRight(percentScale).ticks(6).tickFormat(d => d + "%"))
-        .selectAll("text")
-        .style("font-size", "12px");
-
-    chart.append("text")
-        .attr("transform", `translate(${w + 50}, ${innerHeight / 2}) rotate(90)`)
-        .attr("text-anchor", "middle")
-        .style("font-size", "13px")
-        .style("fill", "#333")
-        .text("Positive rate (%)");
 
     const tooltip = chart
         .append("g")

@@ -1,4 +1,4 @@
-const drawDrugTrendLine = (data) => {
+const drawDrugTrendStackedBar = (data) => {
     const container = d3.select("#drug-trend-line");
     container.html("");
 

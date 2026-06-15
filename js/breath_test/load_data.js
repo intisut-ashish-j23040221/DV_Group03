@@ -75,7 +75,7 @@ Promise.all([
 
         drawKPIs(filtered, comparisonData);
         drawJurisdictionBreathBar(filtered);
-        drawBreathTrendLine(filtered);
+        drawBreathTrendStackedBar(filtered);
         drawPositiveBreathBar(filtered);
     };
 
