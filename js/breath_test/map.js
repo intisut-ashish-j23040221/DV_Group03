@@ -112,9 +112,20 @@ const drawPositiveBreathBar = async (data) => {
         `)
         .style("visibility", "visible");
 
-        let resp = e.currentTarget.getBoundingClientRect();
+        const svgElement = e.currentTarget.closest("svg");
+        let resp = svgElement.getBoundingClientRect();
 
-        tooltip.style("top", (resp.top + window.scrollY) + "px").style("left", (resp.left + window.scrollY - tooltip.node().offsetWidth) + "px");
+        const [centroidX, centroidY] = path.centroid(d);
+
+        const absoluteX = resp.left + window.scrollX + centroidX;
+        const absoluteY = resp.top + window.scrollY + centroidY;
+
+        tooltip
+            .style("left", `${absoluteX}px`)
+            .style("top", `${absoluteY - 20}px`) 
+            .style("transform", "translateX(-50%)");
+
+        // tooltip.style("top", (resp.top + window.scrollY) + "px").style("left", (resp.left + window.scrollY - tooltip.node().offsetWidth) + "px");
     }
 
     states
