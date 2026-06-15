@@ -43,9 +43,18 @@ const drawDrugTrendStackedBar = (data) => {
     const xScale = createBandScale(chartData.map(d => d.year), w, 0.2);
     const yScale = createLinearScaleY([0, d3.max(chartData, d => d.conducted)], innerHeight);
 
+    const yAxisGroup = chart.append("g");
+    const updateYAxis = (maxValue) => {
+        yScale.domain([0, maxValue]);
+        yAxisGroup
+            .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")))
+            .selectAll("text")
+            .style("font-size", "12px");
+    };
+
     const stackedSegments = layers.flatMap(layer => layer.map(segment => ({ ...segment, key: layer.key })));
 
-    chart.append("g")
+    const bars = chart.append("g")
         .selectAll("g")
         .data(layers)
         .join("g")
@@ -61,7 +70,7 @@ const drawDrugTrendStackedBar = (data) => {
         .attr("data-key", d => d.key)
         .attr("fill", d => colorScale(d.key));
 
-    chart.append("g")
+    const labels = chart.append("g")
         .selectAll("text")
         .data(stackedSegments)
         .join("text")
@@ -75,14 +84,33 @@ const drawDrugTrendStackedBar = (data) => {
         .text(d => {
             const value = d[1] - d[0];
             return value > 0 ? d3.format(".2s")(value) : "";
-        })
-        .filter(function(d) {
-            const pixelHeight = yScale(d[0]) - yScale(d[1]);
-            const value = d[1] - d[0];
-            // Only show labels when the segment is tall enough in pixels
-            // and has a non-zero value. Threshold tuned to avoid overlap.
-            return pixelHeight > 18 && value > 0;
         });
+
+    const updateChartVisibility = (key) => {
+        const maxValue = key ? d3.max(chartData, d => d[key]) : d3.max(chartData, d => d.conducted);
+        updateYAxis(maxValue);
+
+        bars
+            .attr('y', d => {
+                if (!key || d.key === key) return yScale(d[1]);
+                return yScale(0);
+            })
+            .attr('height', d => {
+                if (!key || d.key === key) return yScale(d[0]) - yScale(d[1]);
+                return 0;
+            })
+            .attr('opacity', d => !key || d.key === key ? 1 : 0);
+
+        labels
+            .attr('y', d => {
+                if (!key || d.key === key) return yScale(d[0]) - (yScale(d[0]) - yScale(d[1])) / 2;
+                return yScale(0);
+            })
+            .attr('opacity', d => {
+                if (!key || d.key === key) return ((yScale(d[0]) - yScale(d[1])) > 18 ? 1 : 0);
+                return 0;
+            });
+    };
 
     chart.append("g")
         .attr("transform", `translate(0,${innerHeight})`)
@@ -98,10 +126,7 @@ const drawDrugTrendStackedBar = (data) => {
         .style("fill", "#333")
         .text("Year");
 
-    chart.append("g")
-        .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")))
-        .selectAll("text")
-        .style("font-size", "12px");
+    updateYAxis(d3.max(chartData, d => d.conducted));
 
     chart.append("text")
         .attr("transform", "rotate(-90)")
@@ -121,10 +146,34 @@ const drawDrugTrendStackedBar = (data) => {
         { key: 'negative', label: 'Non-positive' }
     ];
 
+    let activeLegendKey = null;
+
+    const updateLegendHighlight = (key) => {
+        chart.selectAll('rect')
+            .filter(function() { return d3.select(this).attr('data-key'); })
+            .attr('opacity', d => {
+                if (!key) return 1;
+                return d.key === key ? 1 : 0.2;
+            });
+
+        legendRows.selectAll('rect')
+            .attr('stroke', d => d.key === key ? '#000' : 'none')
+            .attr('stroke-width', d => d.key === key ? 2 : 0);
+
+        legendRows.selectAll('text')
+            .style('font-weight', d => d.key === key ? '700' : '400');
+    };
+
     const legendRows = legend.selectAll('g')
         .data(legendItems)
         .join('g')
-        .attr('transform', (_, i) => `translate(${i * 140}, 0)`);
+        .attr('transform', (_, i) => `translate(${i * 140}, 0)`)
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {
+            activeLegendKey = activeLegendKey === d.key ? null : d.key;
+            updateLegendHighlight(activeLegendKey);
+            updateChartVisibility(activeLegendKey);
+        });
 
     legendRows.append('rect')
         .attr('width', 14)
@@ -138,6 +187,9 @@ const drawDrugTrendStackedBar = (data) => {
         .style('font-size', '12px')
         .attr('alignment-baseline', 'middle')
         .text(d => d.label);
+
+    updateLegendHighlight(activeLegendKey);
+    updateChartVisibility(activeLegendKey);
 
     const tooltip = chart
         .append("g")
