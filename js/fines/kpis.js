@@ -53,15 +53,20 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
     const cameraDelta = previousCameraFines > 0 ? ((cameraFines - previousCameraFines) / previousCameraFines) * 100 : null;
 
     const arrests = d3.sum(currentYearData, d => d.arrests || 0);
+    const previousArrests = d3.sum(previousYearData, d => d.arrests || 0);
+    const arrestsDelta = previousArrests > 0 ? ((arrests - previousArrests) / previousArrests) * 100 : null;
+
     const charges = d3.sum(currentYearData, d => d.charges || 0);
+    const previousCharges = d3.sum(previousYearData, d => d.charges || 0);
+    const chargesDelta = previousCharges > 0 ? ((charges - previousCharges) / previousCharges) * 100 : null;
 
     // Main KPI block
     containerMain
         .append('div')
         .attr('class', 'kpi-main-card')
         .html(`
-            <div class="kpi-sub">${metricLabel}, ${latestYear}</div>
             <div class="kpi-value">${totalInfringements.toLocaleString()}</div>
+            <div class="kpi-sub">${metricLabel}, ${latestYear}</div>
             <div class="kpi-trend ${changeClass}">${changePercent === null ? 'N/A' : `${changeArrow} ${Math.abs(changePercent).toFixed(2)}%`} ${previousYear === null ? 'vs previous year' : `vs ${previousYear}`}</div>
         `);
 
@@ -84,7 +89,10 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
     miscCard.html(`
         <div class="kpi-card-sub">Arrests</div>
         <div class="kpi-card-small">${arrests.toLocaleString()}</div>
-        <div class="kpi-card-sub">Charges</div>
+        <div class="kpi-card-trend ${arrestsDelta === null ? 'kpi-change--flat' : (arrestsDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(arrestsDelta, previousYear)}</div>
+        
+        <div class="kpi-card-sub" style="margin-top: 10px;">Charges</div>
         <div class="kpi-card-small">${charges.toLocaleString()}</div>
+        <div class="kpi-card-trend ${chargesDelta === null ? 'kpi-change--flat' : (chargesDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(chargesDelta, previousYear)}</div>
     `);
 };

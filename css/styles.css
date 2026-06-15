@@ -43,8 +43,8 @@ h2 {
 }
 
 .logo-button img {
-	width: 64px; /* fixed from oversized values */
-	height: 64px;
+	width: 400px; /* fixed from oversized values */
+	height: 100px;
 	object-fit: contain; /* To make the image is fit nicely in the defined container */
 }
 

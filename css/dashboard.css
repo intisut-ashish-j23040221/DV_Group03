@@ -87,7 +87,7 @@ body {
 }
 
 .chart-panel--medium {
-	min-height: 380px;
+	min-height: 450px;
 	height: auto;
 }
 
@@ -132,7 +132,7 @@ body {
 
 .kpi-value {
 	font-size: 34px;
-	font-weight: 700;
+	font-weight: 900;
 	line-height: 1;
 }
 
@@ -157,7 +157,7 @@ body {
 
 .kpi-card-value {
 	font-size: 20px;
-	font-weight: 700;
+	font-weight: 900;
 }
 
 .kpi-card-label {
@@ -167,7 +167,7 @@ body {
 
 .kpi-card-small {
 	font-size: 18px;
-	font-weight: 700;
+	font-weight: 900;
 	margin-bottom: 2px;
 }
 
