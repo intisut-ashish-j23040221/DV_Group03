@@ -81,7 +81,7 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .style("font-size", "11px")
         .style("fill", "white")
         .style("pointer-events", "none")
-        .class("text-value-label")
+        .attr("class", "text-value-label")
         .text(d => {
             const value = d[1] - d[0];
             return value > 0 ? d3.format(".2s")(value) : "";

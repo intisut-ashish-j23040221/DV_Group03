@@ -12,7 +12,6 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         justify-content: center;
         z-index: 1000;
         padding: 16px;
-        width: 50%;
     `;
     
     // Close modal when clicking on overlay background
@@ -26,43 +25,47 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     content.style.cssText = `
         background: white;
         border-radius: 12px;
-        width: 100%;
-        max-width: 1100px;
-        max-height: 90vh;
+        width: 95%;
+        max-width: 1300px;
+        height: 95vh;
         overflow: hidden;
         display: flex;
+        flex-direction: column;
         box-shadow: 0 16px 40px rgba(0,0,0,0.18);
     `;
     
     // Prevent clicks inside content from closing modal
     content.addEventListener('click', (e) => {
-        e.stopPropagation();
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
 
     const leftPane = document.createElement('div');
     leftPane.style.cssText = `
-        width: 56%;
-        min-width: 360px;
-        padding: 10px 24px;
-        border-right: 1px solid #ebedf0;
+        height: 60%;
+        width: 100%;
+        padding: 20px 24px;
+        border-bottom: 1px solid #ebedf0;
         overflow: auto;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        background: #fafafa;
     `;
 
     const rightPane = document.createElement('div');
     rightPane.style.cssText = `
-        width: 44%;
-        min-width: 280px;
-        padding: 20px;
+        flex: 1;
+        width: 100%;
+        padding: 24px;
         overflow: auto;
     `;
 
     const clone = chartContainer.cloneNode(true);
-    // Make the cloned chart fill available modal vertical space (height expanded)
-    clone.style.cssText = 'width: 100%; height: 100%; display: block;';
+    // Make the cloned chart fill available modal vertical space
+    clone.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;';
     // Remove any existing tooltips from the clone
     clone.querySelectorAll('.tooltip').forEach(el => el.remove());
     // Disable tooltip interactions in the cloned chart
@@ -70,25 +73,35 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         el.style.pointerEvents = 'none';
     });
     clone.querySelectorAll("g text.text-value-label").forEach(t => t.remove() );
-    // Ensure the SVG inside the clone stretches to fill the wrapper
+    // Ensure the SVG inside the clone stretches to fill the wrapper proportionally
     clone.querySelectorAll('svg').forEach(sv => {
         try {
-            // sv.setAttribute('width', '50%');
-            // sv.setAttribute('height', '100%');
-            sv.setAttribute('preserveAspectRatio', 'none');
+            sv.setAttribute('width', '100%');
+            sv.setAttribute('height', '100%');
+            sv.setAttribute('preserveAspectRatio', 'xMidYMid meet');
             sv.style.display = 'block';
+            sv.style.width = '100%';
             sv.style.height = '100%';
-            sv.style.aspectRatio = "1 / 1";
-            sv.setAttribute('viewBox', `0 0 ${w/2} ${sv.getAttribute('height')}`);
-            sv.querySelectorAll("text").forEach(t => t.remove() )
-            // sv.style.vectorEffect = 'non-scaling-stroke';
-            // sv.style.height = 'auto';
-            window.dispatchEvent(new Event('resize'));
+            sv.style.aspectRatio = 'auto';
+
+            // Enhance text clarity in the modal
+            sv.querySelectorAll('text').forEach(t => {
+                t.style.fontWeight = '500';
+                const currentFontSize = window.getComputedStyle(t).fontSize;
+                const fs = parseFloat(currentFontSize);
+                if (fs && fs < 14) {
+                    t.style.fontSize = '14px';
+                }
+                // Ensure labels are dark enough
+                if (t.style.fill === 'rgb(51, 51, 51)' || t.getAttribute('fill') === '#333') {
+                    t.style.fill = '#111';
+                }
+            });
         } catch (e) {}
     });
 
     const chartCloneWrapper = document.createElement('div');
-    chartCloneWrapper.style.cssText = 'width: 100%; height: calc(86vh - 80px); display: flex; align-items: center; justify-content: center; background: #fafafa; border-radius: 8px; padding: 16px 20px;';
+    chartCloneWrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;';
     chartCloneWrapper.appendChild(clone);
     leftPane.appendChild(chartCloneWrapper);
 
@@ -203,7 +216,6 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     content.appendChild(leftPane);
     content.appendChild(rightPane);
     modal.appendChild(content);
-    setTimeout(() => { modal.style.cssText = modal.style.cssText.split(";").slice(0, -2).join(";") }, 1100)
     document.body.appendChild(modal);
 
     const escHandler = (e) => {
