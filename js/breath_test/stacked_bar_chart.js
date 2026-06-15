@@ -33,84 +33,107 @@ const drawBreathTrendStackedBar = (data) => {
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const keys = ["positive", "other"];
-    const colorScale = d3.scaleOrdinal()
-        .domain(keys)
-        .range(["#D32F2F", "#004B87"]);
-
-    const stack = d3.stack().keys(keys);
-    const layers = stack(chartData);
-    const stackedSegments = layers.flatMap(layer => layer.map(segment => ({ ...segment, key: layer.key })));
-
     const xScale = createBandScale(chartData.map(d => d.year), w, 0.2);
     const yScale = createLinearScaleY([0, d3.max(chartData, d => d.conducted)], innerHeight);
-    const percentScale = createLinearScaleY([0, d3.max(chartData, d => d.percent)], innerHeight);
+    const yScalePositive = createLinearScaleY([0, d3.max(chartData, d => d.positive)], innerHeight);
 
     const yAxisGroup = chart.append("g");
-    const updateYAxis = (maxValue) => {
-        yScale.domain([0, maxValue]);
-        yAxisGroup
-            .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")))
-            .selectAll("text")
-            .style("font-size", "12px");
+    const yAxisPositiveGroup = chart.append("g")
+        .attr("transform", `translate(${w}, 0)`);
+
+    const updateAxes = (showOther, showPositive) => {
+        if (showOther && !showPositive) {
+            yScale.domain([0, d3.max(chartData, d => d.other) || 10]);
+            yAxisGroup.style("opacity", 1).call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")));
+            yAxisPositiveGroup.style("opacity", 0);
+        } else if (!showOther && showPositive) {
+            yScale.domain([0, d3.max(chartData, d => d.positive) || 10]);
+            yAxisGroup.style("opacity", 1).call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")));
+            yAxisPositiveGroup.style("opacity", 0);
+        } else {
+            // Both shown: Dual Axis
+            yScale.domain([0, d3.max(chartData, d => d.other) || 10]);
+            yScalePositive.domain([0, d3.max(chartData, d => d.positive) || 10]);
+            yAxisGroup.style("opacity", 1).call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")));
+            yAxisPositiveGroup.style("opacity", 1).call(d3.axisRight(yScalePositive).ticks(6).tickFormat(d3.format(".2s")));
+        }
+        
+        yAxisGroup.selectAll("text").style("font-size", "12px");
+        yAxisPositiveGroup.selectAll("text").style("font-size", "12px");
     };
 
+    // Bars for "Other" (Non-positive)
     const bars = chart.append("g")
-        .selectAll("g")
-        .data(layers)
-        .join("g")
-        .attr("fill", d => colorScale(d.key))
         .selectAll("rect")
-        .data(layer => layer.map(segment => ({ ...segment, key: layer.key })))
+        .data(chartData)
         .join("rect")
-        .attr("x", d => xScale(d.data.year))
-        .attr("y", d => yScale(d[1]))
-        .attr("height", d => yScale(d[0]) - yScale(d[1]))
+        .attr("x", d => xScale(d.year))
         .attr("width", xScale.bandwidth())
-        .attr("data-year", d => d.data.year)
-        .attr("data-key", d => d.key)
-        .attr("fill", d => colorScale(d.key));
+        .attr("fill", "#004B87")
+        .attr("data-year", d => d.year)
+        .attr("data-key", "other");
 
-    const labels = chart.append("g")
-        .selectAll("text")
-        .data(stackedSegments)
-        .join("text")
-        .attr("x", d => xScale(d.data.year) + xScale.bandwidth() / 2)
-        .attr("y", d => yScale(d[0]) - (yScale(d[0]) - yScale(d[1])) / 2)
-        .attr("text-anchor", "middle")
-        .attr("dy", "0.35em")
-        .style("font-size", "11px")
-        .style("fill", "white")
-        .style("pointer-events", "none")
-        .text(d => {
-            const value = d[1] - d[0];
-            return value > 0 ? d3.format(".2s")(value) : "";
-        });
+    // Line for "Positive"
+    const lineGenerator = d3.line()
+        .x(d => xScale(d.year) + xScale.bandwidth() / 2)
+        .y(d => yScalePositive(d.positive));
+
+    const positiveLine = chart.append("path")
+        .datum(chartData)
+        .attr("fill", "none")
+        .attr("stroke", "#D32F2F")
+        .attr("stroke-width", 3)
+        .attr("d", lineGenerator);
+
+    const positiveDots = chart.append("g")
+        .selectAll("circle")
+        .data(chartData)
+        .join("circle")
+        .attr("cx", d => xScale(d.year) + xScale.bandwidth() / 2)
+        .attr("cy", d => yScalePositive(d.positive))
+        .attr("r", 5)
+        .attr("fill", "#D32F2F")
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2)
+        .attr("data-year", d => d.year)
+        .attr("data-key", "positive");
 
     const updateChartVisibility = (key) => {
-        const maxValue = key ? d3.max(chartData, d => d[key]) : d3.max(chartData, d => d.conducted);
-        updateYAxis(maxValue);
+        const showOther = !key || key === 'other';
+        const showPositive = !key || key === 'positive';
+
+        updateAxes(showOther, showPositive);
 
         bars
-            .attr('y', d => {
-                if (!key || d.key === key) return yScale(d[1]);
-                return yScale(0);
-            })
-            .attr('height', d => {
-                if (!key || d.key === key) return yScale(d[0]) - yScale(d[1]);
-                return 0;
-            })
-            .attr('opacity', d => !key || d.key === key ? 1 : 0);
+            .transition().duration(500)
+            .attr('y', d => showOther ? yScale(d.other) : yScale(0))
+            .attr('height', d => showOther ? yScale(0) - yScale(d.other) : 0)
+            .attr('opacity', showOther ? 1 : 0);
 
-        labels
-            .attr('y', d => {
-                if (!key || d.key === key) return yScale(d[0]) - (yScale(d[0]) - yScale(d[1])) / 2;
+        positiveLine
+            .transition().duration(500)
+            .attr("d", d3.line()
+                .x(d => xScale(d.year) + xScale.bandwidth() / 2)
+                .y(d => {
+                    if (showOther && showPositive) return yScalePositive(d.positive);
+                    if (showPositive) return yScale(d.positive);
+                    return yScale(0);
+                })
+            )
+            .attr('opacity', showPositive ? 1 : 0);
+
+        positiveDots
+            .transition().duration(500)
+            .attr("cy", d => {
+                if (showOther && showPositive) return yScalePositive(d.positive);
+                if (showPositive) return yScale(d.positive);
                 return yScale(0);
             })
-            .attr('opacity', d => {
-                if (!key || d.key === key) return ((yScale(d[0]) - yScale(d[1])) > (d.key === 'positive' ? 26 : 18) ? 1 : 0);
-                return 0;
-            });
+            .attr('opacity', showPositive ? 1 : 0);
+            
+        // Update Y-axis labels
+        chart.select(".y-label-left").text(showOther ? "Non-positive Cases" : "Positive Cases");
+        chart.select(".y-label-right").style("opacity", (showOther && showPositive) ? 1 : 0);
     };
 
     chart.append("g")
@@ -127,9 +150,8 @@ const drawBreathTrendStackedBar = (data) => {
         .style("fill", "#333")
         .text("Year");
 
-    updateYAxis(d3.max(chartData, d => d.conducted));
-
     chart.append("text")
+        .attr("class", "y-label-left")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
         .attr("y", -78)
@@ -137,6 +159,16 @@ const drawBreathTrendStackedBar = (data) => {
         .style("font-size", "13px")
         .style("fill", "#333")
         .text("Total Breath Tests Conducted");
+
+    chart.append("text")
+        .attr("class", "y-label-right")
+        .attr("transform", "rotate(90)")
+        .attr("x", innerHeight / 2)
+        .attr("y", -w - 60)
+        .attr("text-anchor", "middle")
+        .style("font-size", "13px")
+        .style("fill", "#D32F2F")
+        .text("Positive Cases");
 
     const tooltip = chart
         .append("g")
@@ -164,103 +196,116 @@ const drawBreathTrendStackedBar = (data) => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    chart.selectAll("rect")
-        .filter(function() { return d3.select(this).attr("data-key"); })
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
-            const barX = +rect.attr("x") + xScale.bandwidth() / 2;
-            const barY = +rect.attr("y");
-            const row = d.data;
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
+        
+        // Find center of the year's band
+        const barX = xScale(d.year) + xScale.bandwidth() / 2;
+        
+        // Determine Y based on which element was hovered
+        let barY;
+        if (e.currentTarget.tagName === 'circle') {
+             const showOther = !activeLegendKey || activeLegendKey === 'other';
+             barY = (showOther && !activeLegendKey) ? yScalePositive(d.positive) : yScale(d.positive);
+        } else {
+             barY = yScale(d.other);
+        }
 
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Year: ${row.year}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Segment: ${d.key === 'positive' ? 'Positive' : 'Non-positive'}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Total tests: ${d3.format(",.0f")(row.conducted)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive cases: ${d3.format(",.0f")(row.positive)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive rate (%): ${row.percent.toFixed(2)}%`);
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Year: ${d.year}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Total conducted: ${d3.format(",.0f")(d.conducted)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Non-positive: ${d3.format(",.0f")(d.other)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive cases: ${d3.format(",.0f")(d.positive)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive rate: ${d.percent.toFixed(2)}%`);
 
-            const tooltipWidth = 300;
-            const tooltipHeight = 120;
-            const spaceAbove = barY;
+        const tooltipWidth = 300;
+        const tooltipHeight = 120;
+        let tooltipX = barX - tooltipWidth / 2;
+        let tooltipY = barY > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
 
-            let tooltipX = barX - tooltipWidth / 2;
-            let tooltipY = spaceAbove > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
+        tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
 
-            tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-            tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+        tooltip
+            .style("opacity", 1)
+            .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
+            .style("z-index", 9999);
+    };
 
-            tooltip
-                .style("opacity", 1)
-                .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
-                .style("z-index", 9999);
-        })
-        .on("mouseleave", () => {
-            tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        });
+    bars.on("mouseenter", handleHover).on("mouseleave", () => tooltip.style("opacity", 0));
+    positiveDots.on("mouseenter", handleHover).on("mouseleave", () => tooltip.style("opacity", 0));
 
     const legend = chart.append("g")
         .attr("transform", `translate(${w / 2 - 100}, ${innerHeight + 40})`);
 
     const legendItems = [
-        { key: 'positive', label: 'Positive' },
-        { key: 'other', label: 'Non-positive' }
+        { key: 'positive', label: 'Positive (Line)', color: "#D32F2F", type: 'line' },
+        { key: 'other', label: 'Non-positive (Bar)', color: "#004B87", type: 'rect' }
     ];
 
     let activeLegendKey = null;
 
-    const updateLegendHighlight = (key) => {
-        chart.selectAll('rect')
-            .filter(function() { return d3.select(this).attr('data-key'); })
-            .attr('opacity', d => {
-                if (!key) return 1;
-                return d.key === key ? 1 : 0.2;
-            });
-
-        legendRows.selectAll('rect')
-            .attr('stroke', d => d.key === key ? '#000' : 'none')
-            .attr('stroke-width', d => d.key === key ? 2 : 0);
-
-        legendRows.selectAll('text')
-            .style('font-weight', d => d.key === key ? '700' : '400');
-    };
-
     const legendRows = legend.selectAll('g')
         .data(legendItems)
         .join('g')
-        .attr('transform', (_, i) => `translate(${i * 140}, 0)`)
+        .attr('transform', (_, i) => `translate(${i * 150}, 0)`)
         .style('cursor', 'pointer')
         .on('click', (event, d) => {
             activeLegendKey = activeLegendKey === d.key ? null : d.key;
-            updateLegendHighlight(activeLegendKey);
+            
+            legendRows.selectAll('text')
+                .style('font-weight', item => item.key === activeLegendKey ? '700' : '400');
+            
+            legendRows.selectAll('.legend-mark')
+                .attr('stroke', item => item.key === activeLegendKey ? '#000' : 'none')
+                .attr('stroke-width', 2);
+
             updateChartVisibility(activeLegendKey);
         });
 
-    legendRows.append('rect')
-        .attr('width', 14)
-        .attr('height', 14)
-        .attr('y', -10)
-        .attr('fill', d => colorScale(d.key));
+    legendRows.each(function(d) {
+        const g = d3.select(this);
+        if (d.type === 'rect') {
+            g.append('rect')
+                .attr('class', 'legend-mark')
+                .attr('width', 14)
+                .attr('height', 14)
+                .attr('y', -10)
+                .attr('fill', d.color);
+        } else {
+            g.append('line')
+                .attr('x1', 0).attr('x2', 14)
+                .attr('y1', -3).attr('y2', -3)
+                .attr('stroke', d.color)
+                .attr('stroke-width', 3);
+            g.append('circle')
+                .attr('class', 'legend-mark')
+                .attr('cx', 7).attr('cy', -3)
+                .attr('r', 4)
+                .attr('fill', d.color);
+        }
+    });
 
     legendRows.append('text')
         .attr('x', 20)
@@ -269,26 +314,25 @@ const drawBreathTrendStackedBar = (data) => {
         .attr('alignment-baseline', 'middle')
         .text(d => d.label);
 
-    updateLegendHighlight(activeLegendKey);
-    updateChartVisibility(activeLegendKey);
+    updateChartVisibility(null);
 
     addDataTableContextMenu(container.node(),
         () => chartData.map(d => ({
             Year: d.year,
-            'Total Breath Tests Conducted': d.conducted.toLocaleString(),
+            'Total Conducted': d.conducted.toLocaleString(),
             'Positive Cases': d.positive.toLocaleString(),
             'Non-positive Cases': d.other.toLocaleString(),
             'Positive Rate (%)': d.percent.toFixed(2) + '%'
         })),
-        () => ['Year', 'Total Breath Tests Conducted', 'Positive Cases', 'Non-positive Cases', 'Positive Rate (%)'],
+        () => ['Year', 'Total Conducted', 'Positive Cases', 'Non-positive Cases', 'Positive Rate (%)'],
         'Breath Tests Conducted vs Positive Results',
-        'Displays breath tests conducted by year with positive and non-positive segments stacked together. Positive Rate (%) is calculated as (Positive Cases ÷ Total Breath Tests Conducted) × 100.',
+        'Displays total breath tests conducted (bars) and positive results (line) by year. Uses dual axes to ensure the small positive counts are clearly visible. Formula: Positive Rate = (Positive Cases ÷ Total Conducted) × 100.',
         (row, clone) => {
             if (!row) {
-                d3.select(clone).selectAll('rect').attr('opacity', 1);
+                d3.select(clone).selectAll('rect, circle').attr('opacity', 1);
                 return;
             }
-            d3.select(clone).selectAll('rect')
+            d3.select(clone).selectAll('rect, circle')
                 .attr('opacity', function() {
                     return d3.select(this).attr('data-year') === String(row.Year) ? 1 : 0.2;
                 });
