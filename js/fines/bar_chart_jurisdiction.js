@@ -5,7 +5,7 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         return;
 
     container.selectAll("*").remove();
-    container.setAttribute("tabindex", "0")
+    container.attr("tabindex", "0")
 
     const metricLabel = formatMetricLabel(metric);
 
