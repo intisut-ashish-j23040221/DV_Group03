@@ -17,36 +17,99 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .map(([jurisdiction, total]) => ({ jurisdiction, total }))
         .sort((a, b) => d3.descending(a.total, b.total));
 
-    updateHorizontalBarScales(
-        [0, d3.max(totals, d => d.total) || 0],
-        totals.map(d => d.jurisdiction)
-    );
+    const containerWidth = container.node().getBoundingClientRect().width || width;
+    const currentInnerWidth = containerWidth - margin.left - margin.right;
+    const w = Math.max(currentInnerWidth, 400);
+
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(totals, d => d.total) || 0])
+        .range([0, w])
+        .nice();
+
+    const yScale = d3.scaleBand()
+        .domain(totals.map(d => d.jurisdiction))
+        .range([0, innerHeight])
+        .padding(0.2);
 
     const svg = container
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .style("width", "100%")
-        .style("height", "auto");
+        .attr("viewBox", `0 0 ${containerWidth} ${height}`)
+        .attr("width", "100%")
+        .attr("height", "100%");
 
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    const secondaryChart = chart.append("g")
-        .attr("transform", `translate(${-margin.left + 75}, 0)`);
-
-    secondaryChart
+    chart
         .selectAll("rect")
         .data(totals)
         .join("rect")
+        .attr("class", "bar")
         .attr("x", 0)
         .attr("y", d => yScale(d.jurisdiction))
         .attr("width", d => xScale(d.total))
         .attr("height", yScale.bandwidth())
-        .attr("fill", "#0f2a45")
-        .append("title")
-        .text(d => `${d.jurisdiction}\n${metricLabel}: ${d.total.toLocaleString()}`);
+        .attr("fill", "#0f2a45");
 
-    secondaryChart
+    // Rich tooltip
+    const tooltip = chart
+        .append("g")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("pointer-events", "none")
+        .style("z-index", 9999);
+
+    tooltip
+        .append("rect")
+        .attr("width", 240)
+        .attr("height", 65)
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("fill", "#0f2a45")
+        .attr("fill-opacity", 0.95)
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2);
+
+    const tooltipText = tooltip
+        .append("text")
+        .attr("x", 12)
+        .attr("y", 18)
+        .attr("fill", "white")
+        .style("font-weight", "bold")
+        .style("font-size", "12px");
+
+    chart.selectAll(".bar")
+        .on("mouseenter", (e, d) => {
+            const rect = d3.select(e.currentTarget);
+            tooltip.style("opacity", 1);
+            tooltip.select('rect').attr('fill', rect.attr('fill') || "#0f2a45");
+            
+            const barX = xScale(d.total);
+            const barY = yScale(d.jurisdiction) + yScale.bandwidth() / 2;
+
+            tooltipText.selectAll("tspan").remove();
+            tooltipText
+                .append("tspan")
+                .attr("x", 12)
+                .attr("dy", 0)
+                .text(`State: ${d.jurisdiction}`);
+            tooltipText
+                .append("tspan")
+                .attr("x", 12)
+                .attr("dy", 18)
+                .text(`${metricLabel}: ${d.total.toLocaleString()}`);
+
+            const tooltipWidth = 240;
+            const tooltipHeight = 65;
+            let tooltipX = barX + 10;
+            if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
+            let tooltipY = barY - tooltipHeight / 2;
+
+            tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
+
+    chart
         .selectAll(".bar-label")
         .data(totals)
         .join("text")
@@ -58,16 +121,16 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .style("fill", "#333")
         .text(d => d.total.toLocaleString());
 
-    secondaryChart
+    chart
         .append("g")
         .call(d3.axisLeft(yScale));
 
-    secondaryChart
+    chart
         .append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
         .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
 
-    secondaryChart
+    chart
         .append("text")
         .attr("x", innerWidth / 2)
         .attr("y", innerHeight + 44)
@@ -79,16 +142,35 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 25)
+        .attr("y", -margin.left + 50)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text("Jurisdiction");
 
-    secondaryChart
+    chart
         .append("text")
         .attr("x", 0)
         .attr("y", -10)
         .style("font-size", "13px")
         .style("font-weight", "600")
         .text(`States with the highest ${metricLabel.toLowerCase()} in Australia`);
+
+    // Right-click support
+    addDataTableContextMenu(container.node(),
+        () => totals.map(d => ({
+            'Jurisdiction': d.jurisdiction,
+            [`Total ${metricLabel}`]: d.total.toLocaleString()
+        })),
+        () => ['Jurisdiction', `Total ${metricLabel}`],
+        'States with the Highest Fines',
+        `A comparison of total ${metricLabel.toLowerCase()} across different Australian states. Hover over a row to highlight that state on the bar chart.`,
+        (row, clone) => {
+            if (!row) {
+                d3.select(clone).selectAll('rect').attr('opacity', 1);
+                return;
+            }
+            d3.select(clone).selectAll('rect')
+                .attr('opacity', d => d.jurisdiction === row.Jurisdiction ? 1 : 0.2);
+        }
+    );
 };

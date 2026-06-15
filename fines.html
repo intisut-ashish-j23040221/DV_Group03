@@ -24,9 +24,9 @@
     </header>
 
     <main class="page-content">
-
-        <div class="visual-important">
-            <section class="filters-row">
+        <aside class="dashboard-sidebar">
+            <section class="sidebar-panel sidebar-panel--filters">
+                <h2>Filter options</h2>
                 <div class="filters" id="filters-controls">
                     <label>Year: <select id="filter-year"></select></label>
                     <label>Jurisdiction: <select id="filter-jurisdiction"></select></label>
@@ -35,37 +35,54 @@
                 </div>
             </section>
 
-            <section class="kpi-row">
-                <div class="kpi-main" id="kpi-main"></div>
-                <div class="kpi-cards" id="kpi-cards"></div>
+            <section class="sidebar-panel sidebar-panel--kpis">
+                <h2>Key performance indicators</h2>
+                <div class="kpi-row">
+                    <div class="kpi-main" id="kpi-main"></div>
+                    <div class="kpi-cards" id="kpi-cards"></div>
+                </div>
             </section>
-        </div>
+        </aside>
 
-        <section class="chart-block chart-block--centered">
-            <div>
-                <h2>States with the Highest Fines in Australia</h2>
-                <div id="jurisdiction-speeding-bar" class="responsive-svg-container"></div>
-            </div>
+        <section class="dashboard-main">
+            <section class="chart-grid">
+                <article class="chart-panel chart-panel--large">
+                    <div class="chart-panel__header">
+                        <h2>Fines Trend Over Time</h2>
+                    </div>
+                    <div id="fines-line-chart" class="responsive-svg-container"></div>
+                </article>
 
-            <div>
-                <h2>Camera Types Capturing the Highest Fines</h2>
-                <div id="camera-speeding-bar" class="responsive-svg-container"></div>
-            </div>
+                <article class="chart-panel chart-panel--medium">
+                    <div class="chart-panel__header">
+                        <h2>States with the Highest Fines in Australia</h2>
+                    </div>
+                    <div id="jurisdiction-speeding-bar" class="responsive-svg-container"></div>
+                </article>
 
-            <div>
-                <h2>Fines Trend Over Time</h2>
-                <div id="fines-line-chart" class="responsive-svg-container"></div>
-            </div>
+                <article class="chart-panel chart-panel--medium">
+                    <div class="chart-panel__header">
+                        <h2>Camera Types Capturing the Highest Fines</h2>
+                    </div>
+                    <div id="camera-speeding-bar" class="responsive-svg-container"></div>
+                </article>
 
-            <div>
-                <h2>Fines by Location (Stacked by Detection Method)</h2>
-                <div id="location-stacked-bar" class="responsive-svg-container"></div>
-            </div>
+                <!-- 
+                <article class="chart-panel chart-panel--large">
+                    <div class="chart-panel__header">
+                        <h2>Fines by Location (Stacked by Detection Method)</h2>
+                    </div>
+                    <div id="location-stacked-bar" class="responsive-svg-container"></div>
+                </article>
 
-            <div>
-                <h2>Heatmap: Monthly Fines by Location</h2>
-                <div id="location-heatmap" class="responsive-svg-container"></div>
-            </div>
+                <article class="chart-panel chart-panel--large">
+                    <div class="chart-panel__header">
+                        <h2>Heatmap: Monthly Fines by Location</h2>
+                    </div>
+                    <div id="location-heatmap" class="responsive-svg-container"></div>
+                </article>
+                -->
+            </section>
         </section>
     </main>
 

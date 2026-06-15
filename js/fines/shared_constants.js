@@ -1,7 +1,7 @@
 //take it from exercise 5 shared_constants.js
-const margin = { top: 50, right: 30, bottom: 80, left: 160 };
+const margin = { top: 24, right: 24, bottom: 72, left: 140 };
 const width = 1000;
-const height = 450;
+const height = 380;
 const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 

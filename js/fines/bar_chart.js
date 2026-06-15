@@ -21,16 +21,25 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .map(([detectionMethod, total]) => ({ detectionMethod, total }))
         .sort((a, b) => d3.descending(a.total, b.total));
 
-    updateHorizontalBarScales(
-        [0, d3.max(totals, d => d.total) || 0],
-        totals.map(d => d.detectionMethod)
-    );
+    const containerWidth = container.node().getBoundingClientRect().width || width;
+    const currentInnerWidth = containerWidth - margin.left - margin.right;
+    const w = Math.max(currentInnerWidth, 400);
+
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(totals, d => d.total) || 0])
+        .range([0, w])
+        .nice();
+
+    const yScale = d3.scaleBand()
+        .domain(totals.map(d => d.detectionMethod))
+        .range([0, innerHeight])
+        .padding(0.2);
 
     const svg = container
         .append("svg")
-        .attr("viewBox", `0 0 ${width} ${height}`)
-        .style("width", "100%")
-        .style("height", "auto");
+        .attr("viewBox", `0 0 ${containerWidth} ${height}`)
+        .attr("width", "100%")
+        .attr("height", "100%");
 
     const chart = svg.append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
@@ -39,13 +48,70 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .selectAll("rect")
         .data(totals)
         .join("rect")
+        .attr("class", "bar")
         .attr("x", 0)
         .attr("y", d => yScale(d.detectionMethod))
         .attr("width", d => xScale(d.total))
         .attr("height", yScale.bandwidth())
+        .attr("fill", "#ff6b6b");
+
+    // Rich tooltip
+    const tooltip = chart
+        .append("g")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("pointer-events", "none")
+        .style("z-index", 9999);
+
+    tooltip
+        .append("rect")
+        .attr("width", 260)
+        .attr("height", 65)
+        .attr("rx", 4)
+        .attr("ry", 4)
         .attr("fill", "#ff6b6b")
-        .append("title")
-        .text(d => `${d.detectionMethod}\n${metricLabel}: ${d.total.toLocaleString()}`);
+        .attr("fill-opacity", 0.95)
+        .attr("stroke", "#ffffff")
+        .attr("stroke-width", 2);
+
+    const tooltipText = tooltip
+        .append("text")
+        .attr("x", 12)
+        .attr("y", 18)
+        .attr("fill", "white")
+        .style("font-weight", "bold")
+        .style("font-size", "12px");
+
+    chart.selectAll(".bar")
+        .on("mouseenter", (e, d) => {
+            const rect = d3.select(e.currentTarget);
+            tooltip.style("opacity", 1);
+            tooltip.select('rect').attr('fill', rect.attr('fill') || "#ff6b6b");
+            
+            const barX = xScale(d.total);
+            const barY = yScale(d.detectionMethod) + yScale.bandwidth() / 2;
+
+            tooltipText.selectAll("tspan").remove();
+            tooltipText
+                .append("tspan")
+                .attr("x", 12)
+                .attr("dy", 0)
+                .text(`Type: ${d.detectionMethod}`);
+            tooltipText
+                .append("tspan")
+                .attr("x", 12)
+                .attr("dy", 18)
+                .text(`${metricLabel}: ${d.total.toLocaleString()}`);
+
+            const tooltipWidth = 260;
+            const tooltipHeight = 65;
+            let tooltipX = barX + 10;
+            if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
+            let tooltipY = barY - tooltipHeight / 2;
+
+            tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
+        })
+        .on("mouseleave", () => tooltip.style("opacity", 0));
 
     chart
         .selectAll(".bar-label")
@@ -79,7 +145,7 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 25)
+        .attr("y", -margin.left + 50)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .text("Camera type");
@@ -91,4 +157,23 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .style("font-size", "13px")
         .style("font-weight", "600")
         .text(`Camera type with the highest ${metricLabel.toLowerCase()}`);
+
+    // Right-click support
+    addDataTableContextMenu(container.node(),
+        () => totals.map(d => ({
+            'Camera Type': d.detectionMethod,
+            [`Total ${metricLabel}`]: d.total.toLocaleString()
+        })),
+        () => ['Camera Type', `Total ${metricLabel}`],
+        'Camera Types Capturing the Highest Fines',
+        `An analysis of which camera technologies are generating the most ${metricLabel.toLowerCase()}. Hover over a row to highlight that camera type on the chart.`,
+        (row, clone) => {
+            if (!row) {
+                d3.select(clone).selectAll('rect').attr('opacity', 1);
+                return;
+            }
+            d3.select(clone).selectAll('rect')
+                .attr('opacity', d => d.detectionMethod === row['Camera Type'] ? 1 : 0.2);
+        }
+    );
 };
