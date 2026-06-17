@@ -157,3 +157,26 @@ h2 {
 .btn-first-time:active {
     transform: translateY(-1px);
 }
+
+/* Footer Styles */
+footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	padding: 1.2rem 1.4rem;
+	background-color: #eeffee;
+	border-top: 2px solid black;
+	border-radius: 5px 5px 0 0;
+	z-index: 100;
+	margin-top: auto;
+}
+
+footer p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--black);
+	text-align: center;
+	font-weight: 500;
+}
