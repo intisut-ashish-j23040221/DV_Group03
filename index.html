@@ -5,18 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Australian's Road Safety Enforcement</title>
     <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.css"/>
 </head>
-<body>
+<body data-page="home">
     <header class="site-header">
         <a class="logo-button" href="index.html" aria-label="Go to Home page">
             <img src="./images/logo.svg" alt="Police Enforcement logo">
         </a>
         <nav class="top-nav" aria-label="Main navigation">
             <ul class="nav-menu">
-                <li><a class="nav-link" href="index.html">Home</a></li>
-                <li><a class="nav-link" href="breath_test.html">Random Breath Test</a></li>
-                <li><a class="nav-link" href="drug_test.html">Drug Tests</a></li>
-                <li><a class="nav-link" href="fines.html">Fines</a></li>
+                <li><a class="nav-link" href="index.html" data-target="home">Home</a></li>
+                <li><a class="nav-link" href="breath_test.html" data-target="breath_test">Random Breath Test</a></li>
+                <li><a class="nav-link" href="drug_test.html" data-target="drug_test">Drug Tests</a></li>
+                <li><a class="nav-link" href="fines.html" data-target="fines">Fines</a></li>
             </ul>
         </nav>
     </header>
@@ -30,22 +31,28 @@
                 </p>
             </div>
             
-            <a href="breath_test.html" class="btn-first-time">First time visited</a>
+            <a href="#" id="start-tour-btn" class="btn-first-time">First time visited</a>
         </section>
     </main>
 
     <footer>
-        <nav aria-label="Footer navigation">
-            <ul class="nav-menu">
-                <li><a class="nav-link" href="index.html">Home</a></li>
-                <li><a class="nav-link" href="breath_test.html">Random Breath Test</a></li>
-                <li><a class="nav-link" href="drug_test.html">Drug Tests</a></li>
-                <li><a class="nav-link" href="fines.html">Fines</a></li>
-            </ul>
-        </nav>
+        <div class="footer-top">
+            <a class="logo-button" href="index.html" aria-label="Go to Home page">
+                <img src="./images/logo.svg" alt="Police Enforcement logo">
+            </a>
+            <nav aria-label="Footer navigation">
+                <ul class="nav-menu">
+                    <li><a class="nav-link" href="index.html">Home</a></li>
+                    <li><a class="nav-link" href="breath_test.html">Random Breath Test</a></li>
+                    <li><a class="nav-link" href="drug_test.html">Drug Tests</a></li>
+                    <li><a class="nav-link" href="fines.html">Fines</a></li>
+                </ul>
+            </nav>
+        </div>
         <p>(c) <span id="current-year"></span> Group 3 | GenAI acknowledgement: Code and some content were developed with assistance from GitHub Copilot (GPT-5.3-Codex).</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/driver.js@1.0.1/dist/driver.js.iife.js"></script>
     <script src="./js/script.js"></script>
 </body>
 </html>

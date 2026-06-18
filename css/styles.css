@@ -164,7 +164,7 @@ footer {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: 1rem;
+	gap: 1.5rem;
 	padding: 1.2rem 1.4rem;
 	background-color: #eeffee;
 	border-top: 2px solid black;
@@ -173,10 +173,38 @@ footer {
 	margin-top: auto;
 }
 
+.footer-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+}
+
+footer .nav-menu {
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.8rem;
+}
+
+@media (max-width: 800px) {
+	.footer-top {
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	
+	footer .nav-menu {
+		justify-content: center;
+	}
+}
+
 footer p {
 	margin: 0;
 	font-size: 0.9rem;
 	color: var(--black);
 	text-align: center;
 	font-weight: 500;
+	width: 100%;
+	border-top: 1px solid #ccc;
+	padding-top: 1rem;
 }

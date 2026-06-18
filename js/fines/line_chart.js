@@ -7,6 +7,7 @@ const drawFinesLineChart = (data, metric = 'All') => {
   }
 
   container.selectAll("*").remove();
+  container.attr("tabindex", "0");
 
   const metricLabel = formatMetricLabel(metric);
 
@@ -59,11 +60,13 @@ const drawFinesLineChart = (data, metric = 'All') => {
     .attr("d", lineGenerator);
 
   // draw data points as circles
-  chart
+  const dots = chart
     .selectAll("circle")
     .data(yearlyTotals)
     .join("circle")
     .attr("class", "dot")
+    .attr("data-year", d => d.year)
+    .attr("tabindex", (d, i) => i === 0 ? "0" : "-1")
     .attr("cx", d => xScale(d.year))
     .attr("cy", d => yScale(d.total))
     .attr("r", 4)
@@ -96,41 +99,50 @@ const drawFinesLineChart = (data, metric = 'All') => {
       .style("font-weight", "bold")
       .style("font-size", "12px");
 
-  chart.selectAll(".dot")
-      .on("mouseenter", (e, d) => {
-          const dot = d3.select(e.currentTarget);
-          tooltip.style("opacity", 1);
-          tooltip.select('rect').attr('fill', dot.attr('fill') || "#1f77b4");
-          
-          const barX = xScale(d.year);
-          const barY = yScale(d.total);
+  const handleHover = (e, d) => {
+      const dot = d3.select(e.currentTarget);
+      tooltip.style("opacity", 1);
+      tooltip.select('rect').attr('fill', dot.attr('fill') || "#1f77b4");
+      
+      const barX = xScale(d.year);
+      const barY = yScale(d.total);
 
-          tooltipText.selectAll("tspan").remove();
-          tooltipText
-              .append("tspan")
-              .attr("x", 12)
-              .attr("dy", 0)
-              .text(`Year: ${d.year}`);
-          tooltipText
-              .append("tspan")
-              .attr("x", 12)
-              .attr("dy", 18)
-              .text(`${metricLabel}: ${d.total.toLocaleString()}`);
+      tooltipText.selectAll("tspan").remove();
+      tooltipText
+          .append("tspan")
+          .attr("x", 12)
+          .attr("dy", 0)
+          .text(`Year: ${d.year}`);
+      tooltipText
+          .append("tspan")
+          .attr("x", 12)
+          .attr("dy", 18)
+          .text(`${metricLabel}: ${d.total.toLocaleString()}`);
 
-          const tooltipWidth = 200;
-          const tooltipHeight = 65;
-          let tooltipX = barX + 10;
-          if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
-          let tooltipY = barY - tooltipHeight - 10;
-          if (tooltipY < 0) tooltipY = barY + 10;
+      const tooltipWidth = 200;
+      const tooltipHeight = 65;
+      let tooltipX = barX + 10;
+      if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
+      let tooltipY = barY - tooltipHeight - 10;
+      if (tooltipY < 0) tooltipY = barY + 10;
 
-          tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
-          d3.select(e.currentTarget).attr("r", 7);
-      })
+      tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
+      dot.attr("r", 7);
+  };
+
+  dots
+      .on("mouseenter", handleHover)
+      .on("focus", handleHover)
       .on("mouseleave", (e) => {
           tooltip.style("opacity", 0);
           d3.select(e.currentTarget).attr("r", 4);
-      });
+      })
+      .on("blur", (e) => {
+          tooltip.style("opacity", 0);
+          d3.select(e.currentTarget).attr("r", 4);
+      })
+      .on("keydown", (e) => { if(typeof createDataPointMovement === 'function') createDataPointMovement(e, dots); })
+      .on("click", (e) => { if(typeof syncClicksBetweenDPs === 'function') syncClicksBetweenDPs(e, dots); });
 
   // draw axes
   chart
@@ -185,12 +197,12 @@ const drawFinesLineChart = (data, metric = 'All') => {
     `Displays the yearly progression of total ${metricLabel.toLowerCase()} in Australia. Hover over a row to highlight that year's data point on the chart.`,
     (row, clone) => {
         if (!row) {
-            d3.select(clone).selectAll('circle').attr('r', 4).attr('opacity', 1);
+            d3.select(clone).selectAll('.dot').attr('r', 4).attr('opacity', 1);
             return;
         }
-        d3.select(clone).selectAll('circle')
-            .attr('opacity', d => d.year === row.Year ? 1 : 0.2)
-            .attr('r', d => d.year === row.Year ? 8 : 4);
+        d3.select(clone).selectAll('.dot')
+            .attr('opacity', function() { return d3.select(this).attr('data-year') === String(row.Year) ? 1 : 0.2; })
+            .attr('r', function() { return d3.select(this).attr('data-year') === String(row.Year) ? 8 : 4; });
     }
   );
 };

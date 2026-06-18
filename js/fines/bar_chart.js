@@ -49,6 +49,8 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .data(totals)
         .join("rect")
         .attr("class", "bar")
+        .attr("data-method", d => d.detectionMethod)
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1")
         .attr("x", 0)
         .attr("y", d => yScale(d.detectionMethod))
         .attr("width", d => xScale(d.total))
@@ -82,36 +84,43 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    chart.selectAll(".bar")
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.style("opacity", 1);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || "#ff6b6b");
-            
-            const barX = xScale(d.total);
-            const barY = yScale(d.detectionMethod) + yScale.bandwidth() / 2;
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.style("opacity", 1);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || "#ff6b6b");
+        
+        const barX = xScale(d.total);
+        const barY = yScale(d.detectionMethod) + yScale.bandwidth() / 2;
 
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Type: ${d.detectionMethod}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 18)
-                .text(`${metricLabel}: ${d.total.toLocaleString()}`);
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Type: ${d.detectionMethod}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 18)
+            .text(`${metricLabel}: ${d.total.toLocaleString()}`);
 
-            const tooltipWidth = 260;
-            const tooltipHeight = 65;
-            let tooltipX = barX + 10;
-            if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
-            let tooltipY = barY - tooltipHeight / 2;
+        const tooltipWidth = 260;
+        const tooltipHeight = 65;
+        let tooltipX = barX + 10;
+        if (tooltipX + tooltipWidth > w) tooltipX = barX - tooltipWidth - 10;
+        let tooltipY = barY - tooltipHeight / 2;
 
-            tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
-        })
-        .on("mouseleave", () => tooltip.style("opacity", 0));
+        tooltip.attr("transform", `translate(${tooltipX}, ${tooltipY})`);
+    };
+
+    const bars = chart.selectAll(".bar");
+    bars
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0))
+        .on("blur", () => tooltip.style("opacity", 0))
+        .on("keydown", (e) => { if(typeof createDataPointMovement === 'function') createDataPointMovement(e, bars); })
+        .on("click", (e) => { if(typeof syncClicksBetweenDPs === 'function') syncClicksBetweenDPs(e, bars); });
 
     chart
         .selectAll(".bar-label")
@@ -169,11 +178,13 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         `An analysis of which camera technologies are generating the most ${metricLabel.toLowerCase()}. Hover over a row to highlight that camera type on the chart.`,
         (row, clone) => {
             if (!row) {
-                d3.select(clone).selectAll('rect').attr('opacity', 1);
+                d3.select(clone).selectAll('.bar').attr('opacity', 1);
                 return;
             }
-            d3.select(clone).selectAll('rect')
-                .attr('opacity', d => d.detectionMethod === row['Camera Type'] ? 1 : 0.2);
+            d3.select(clone).selectAll('.bar')
+                .attr('opacity', function() {
+                    return d3.select(this).attr('data-method') === row['Camera Type'] ? 1 : 0.2;
+                });
         }
     );
 };

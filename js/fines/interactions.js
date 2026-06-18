@@ -92,65 +92,169 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     chartCloneWrapper.appendChild(clone);
     leftPane.appendChild(chartCloneWrapper);
 
-    const titleEl = document.createElement('h2');
-    titleEl.innerText = title;
-    titleEl.style.cssText = 'margin: 0 0 8px 0; font-size: 20px; color: #062f56;';
-    
-    const explanationEl = document.createElement('p');
-    explanationEl.innerText = explanation;
-    explanationEl.style.cssText = 'margin: 0 0 20px 0; font-size: 14px; color: #666; line-height: 1.5;';
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    titleEl.style.cssText = 'margin: 0 0 10px; font-size: 20px; color: #1f2937;';
+    rightPane.appendChild(titleEl);
+
+    if (explanation) {
+        const explEl = document.createElement('p');
+        explEl.textContent = explanation;
+        explEl.style.cssText = 'margin: 0 0 18px; color: #4b5563; line-height: 1.6; font-size: 14px;';
+        rightPane.appendChild(explEl);
+    }
 
     const table = document.createElement('table');
-    table.style.cssText = 'width: 100%; border-collapse: collapse; font-size: 13px;';
-    
-    const thead = table.createTHead();
-    const headerRow = thead.insertRow();
+    table.style.cssText = `
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+    `;
+
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    headerRow.style.cssText = 'background: #f3f4f6; border-bottom: 2px solid #d1d5db;';
     columns.forEach(col => {
         const th = document.createElement('th');
-        th.innerText = col;
-        th.style.cssText = 'text-align: left; padding: 12px 8px; border-bottom: 2px solid #ebedf0; background: #f8f9fa; position: sticky; top: 0;';
+        th.textContent = col;
+        th.style.cssText = 'padding: 12px 10px; text-align: left; font-weight: 600; color: #111827;';
         headerRow.appendChild(th);
     });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
 
-    const tbody = table.createTBody();
-    data.forEach(rowData => {
-        const row = tbody.insertRow();
-        row.style.cursor = 'pointer';
-        row.style.transition = 'background 0.2s';
-        
-        row.addEventListener('mouseenter', () => {
-            row.style.background = '#f0f4f8';
-            if (onRowClick) onRowClick(rowData, clone);
-        });
-        row.addEventListener('mouseleave', () => {
-            row.style.background = 'transparent';
-            if (onRowClick) onRowClick(null, clone);
-        });
+    const tbody = document.createElement('tbody');
+    data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
+        tr.style.cssText = idx % 2 === 0 ? 'background: #fafafa;' : 'background: white;';
+        tr.style.borderBottom = '1px solid #e5e7eb';
+        tr.style.cursor = 'pointer';
 
         columns.forEach(col => {
-            const cell = row.insertCell();
-            cell.innerText = rowData[col] || '';
-            cell.style.cssText = 'padding: 10px 8px; border-bottom: 1px solid #ebedf0;';
+            const td = document.createElement('td');
+            const value = row[col];
+            td.textContent = typeof value === 'number' ? value.toLocaleString() : value;
+            td.style.cssText = 'padding: 10px; color: #374151;';
+            tr.appendChild(td);
         });
-    });
 
-    rightPane.appendChild(titleEl);
-    rightPane.appendChild(explanationEl);
+        tr.addEventListener('click', () => {
+            Array.from(tbody.querySelectorAll('tr')).forEach((rowEl, i) => {
+                rowEl.style.background = rowEl === tr ? '#e0f2fe' : i % 2 === 0 ? '#fafafa' : 'white';
+            });
+            if (onRowClick) {
+                onRowClick(row, clone, tr);
+            }
+        });
+
+        tr.addEventListener('mouseover', () => tr.style.background = '#f3f4f6');
+        tr.addEventListener('mouseout', () => {
+            if (tr !== document.activeElement) {
+                tr.style.background = idx % 2 === 0 ? '#fafafa' : 'white';
+            }
+        });
+
+        tbody.appendChild(tr);
+    });
+    table.appendChild(tbody);
     rightPane.appendChild(table);
+
+    const buttonRow = document.createElement('div');
+    buttonRow.style.cssText = 'margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap;';
+
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Reset selection';
+    resetBtn.style.cssText = `
+        padding: 10px 14px;
+        background: #ffffff;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        color: #111827;
+        cursor: pointer;
+    `;
+    resetBtn.onclick = () => {
+        Array.from(tbody.querySelectorAll('tr')).forEach((rowEl, j) => {
+            rowEl.style.background = j % 2 === 0 ? '#fafafa' : 'white';
+        });
+        if (onRowClick) {
+            onRowClick(null, clone, null);
+        }
+    };
+    buttonRow.appendChild(resetBtn);
+
+    const closeBtn = document.createElement('button');
+    closeBtn.textContent = 'Close';
+    closeBtn.style.cssText = `
+        padding: 10px 14px;
+        background: #004B87;
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+    `;
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modal.remove();
+    });
+    buttonRow.appendChild(closeBtn);
+
+    rightPane.appendChild(buttonRow);
 
     content.appendChild(leftPane);
     content.appendChild(rightPane);
     modal.appendChild(content);
-
-    modal.addEventListener('click', () => modal.remove());
     document.body.appendChild(modal);
+
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
 };
+
+const triggerMenu = (e, dataFn, columnsFn, container, title, explanation, onRowClick) => {
+    const data = dataFn();
+    const columns = columnsFn();
+    showChartDataTable(e, container, data, columns, title, explanation, onRowClick)
+}
 
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
-    container.addEventListener('contextmenu', (e) => {
-        const data = dataFn();
-        const columns = columnsFn();
-        showChartDataTable(e, container, data, columns, title, explanation, onRowClick);
-    });
+    let params = [dataFn, columnsFn, container, title, explanation, onRowClick];
+    container.addEventListener('contextmenu', (e) => triggerMenu(e, ...params));
+    container.addEventListener("keydown", (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null)
 };
+
+const syncClicksBetweenDPs = (e, dp) => {
+    dp.attr("tabindex", "-1");
+    d3.select(e.currentTarget).attr("tabindex", "0");
+}
+
+const createDataPointMovement = (event, dp) => {
+  const targetElement = event.currentTarget;
+  const barsArray = dp.nodes();
+  const currentIndex = barsArray.indexOf(targetElement);
+  let nextIndex = currentIndex;
+
+  // 1. NAVIGATION: Arrow Keys
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    nextIndex = (currentIndex + 1) % barsArray.length;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
+  }
+  
+  // If the index changed, rove the tabindex and shift focus
+  if (nextIndex !== currentIndex) {
+    // Set all dp to -1
+    dp.attr("tabindex", "-1");
+    // Set the newly targeted bar to 0
+    d3.select(barsArray[nextIndex]).attr("tabindex", "0");
+    // Focus the new bar
+    barsArray[nextIndex].focus();
+    return; // Exit early
+  }
+}
