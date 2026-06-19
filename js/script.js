@@ -63,7 +63,9 @@
 						{ element: '.welcome-container', popover: { title: 'Welcome!', description: 'This platform helps you explore traffic compliance trends in Australia.', side: "left", align: 'start' }},
 						{ element: '.top-nav', popover: { title: 'Navigation Menu', description: 'Use these links to navigate to the different dashboards: Random Breath Test, Drug Tests, and Fines.', side: "bottom", align: 'start' }},
 						{ element: '.logo-button', popover: { title: 'Home', description: 'Click the logo at any time to return to this home page.', side: "bottom", align: 'start' }},
-						{ element: '.nav-link[href="breath_test.html"]', popover: { title: 'Get Started', description: 'Click here to start exploring the Random Breath Test dashboard!', side: "bottom", align: 'start' }},
+						{ element: '.nav-link[href="breath_test.html"]', popover: { title: 'Random Breath Test Dashboard', description: 'Click here to start exploring the Random Breath Test dashboard!', side: "bottom", align: 'start' }},
+						{ element: '.nav-link[href="drug_test.html"]', popover: { title: 'Drug Tests Dashboard', description: 'Click here to explore the Drug Tests dashboard, tracking tests and positive outcomes.', side: "bottom", align: 'start' }},
+						{ element: '.nav-link[href="fines.html"]', popover: { title: 'Fines Dashboard', description: 'Click here to analyze traffic fines, historical trends, and camera detection data.', side: "bottom", align: 'start' }},
 						{ element: '.nav-menu', popover: { title: 'Dashboard Tours', description: 'Once you are on a dashboard, look for the "?" icon next to "Filter options" to take a tour of that specific page!', side: "bottom", align: 'start' }}
 					]
 				});
@@ -103,9 +105,10 @@
 					steps: [
 						{ element: '.sidebar-panel--filters', popover: { title: 'Filter Options', description: 'Filter drug test data by Year and Jurisdiction.', side: "right", align: 'start' }},
 						{ element: '.sidebar-panel--kpis', popover: { title: 'Drug Test KPIs', description: 'View total drug tests, positive results, and year-over-year changes.', side: "right", align: 'start' }},
-						{ element: '#tour-drug-trend', popover: { title: 'Drug Test Trends', description: 'Compare total tests vs positive cases over time.', side: "bottom", align: 'center' }},
+						{ element: '#tour-drug-trend', popover: { title: 'Drug Test Trends', description: 'Compare total tests vs positive cases over time. You can click on legends to toggle series.', side: "bottom", align: 'center' }},
 						{ element: '#tour-drug-percent', popover: { title: 'Regional Distribution', description: 'See how positive drug tests vary across different jurisdictions.', side: "top", align: 'center' }},
-						{ element: '#tour-drug-jurisdiction', popover: { title: 'Normalized Data', description: 'Drug tests per 10,000 licenses for a fair comparison between states.', side: "top", align: 'center' }}
+						{ element: '#tour-drug-jurisdiction', popover: { title: 'Normalized Data', description: 'Drug tests per 10,000 licenses for a fair comparison between states.', side: "top", align: 'center' }},
+						{ popover: { title: 'Interactive Features', description: 'Remember, you can hover over elements for details, or right-click any chart to open a data table!', side: "center", align: 'center' }}
 					]
 				});
 				driverObj.drive();
@@ -123,9 +126,10 @@
 					steps: [
 						{ element: '.sidebar-panel--filters', popover: { title: 'Fines Filters', description: 'Filter fines by Year, Jurisdiction, and specific Metrics.', side: "right", align: 'start' }},
 						{ element: '.sidebar-panel--kpis', popover: { title: 'Financial Indicators', description: 'Quick overview of total fines and average amounts.', side: "right", align: 'start' }},
-						{ element: '#tour-fines-trend', popover: { title: 'Historical Fines', description: 'Track how fine amounts have changed over the years.', side: "bottom", align: 'center' }},
+						{ element: '#tour-fines-trend', popover: { title: 'Historical Fines', description: 'Track how fine amounts have changed over the years. You can click on legends to toggle series.', side: "bottom", align: 'center' }},
 						{ element: '#tour-fines-state', popover: { title: 'Top Jurisdictions', description: 'Identify states with the highest fine revenue.', side: "top", align: 'center' }},
-						{ element: '#tour-fines-camera', popover: { title: 'Detection Methods', description: 'See which camera types are capturing the most fines.', side: "top", align: 'center' }}
+						{ element: '#tour-fines-camera', popover: { title: 'Detection Methods', description: 'See which camera types are capturing the most fines.', side: "top", align: 'center' }},
+						{ popover: { title: 'Interactive Features', description: 'Remember, you can hover over elements for details, or right-click any chart to open a data table!', side: "center", align: 'center' }}
 					]
 				});
 				driverObj.drive();
