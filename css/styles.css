@@ -1,3 +1,11 @@
+:root {
+	--black: #1a202c;
+	--yellow-bg: #f8f9fa;
+	--yellow: #eeffee;
+	--dark-green: #053b21;
+	--brown: #212529;
+}
+
 /* make the width sizing include the padding and border */
 * {
 	box-sizing: border-box;
@@ -86,9 +94,10 @@ h2 {
 }
 
 .nav-link.is-active {
-	background-color: var(--dark-yellow);
-	border-color: var(--brown);
-	box-shadow: inset 0 -2px 0 var(--brown); /* add a shadow at the bottom of nav link for current active page */
+	background-color: var(--dark-green);
+	color: #ffffff;
+	border-color: var(--dark-green);
+	box-shadow: inset 0 -2px 0 var(--dark-green);
 }
 
 .page-content {
