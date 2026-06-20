@@ -57,6 +57,51 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .attr("height", yScale.bandwidth())
         .attr("fill", "#ff6b6b");
 
+    chart
+        .selectAll(".bar-label")
+        .data(totals)
+        .join("text")
+        .attr("class", "bar-label")
+        .attr("x", d => xScale(d.total) + 5)
+        .attr("y", d => yScale(d.detectionMethod) + yScale.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .style("font-size", "12px")
+        .style("fill", "#333")
+        .text(d => d.total.toLocaleString());
+    chart
+        .append("g")
+        .call(d3.axisLeft(yScale));
+
+    chart
+        .append("g")
+        .attr("transform", `translate(0, ${innerHeight})`)
+        .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
+
+    chart
+        .append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 44)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text(`Total ${metricLabel.toLowerCase()}`);
+
+    chart
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerHeight / 2)
+        .attr("y", -margin.left + 50)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("Camera type");
+
+    chart
+        .append("text")
+        .attr("x", 0)
+        .attr("y", -10)
+        .style("font-size", "13px")
+        .style("font-weight", "600")
+        .text(`Camera type with the highest ${metricLabel.toLowerCase()}`);
+
     // Rich tooltip
     const tooltip = chart
         .append("g")
@@ -72,7 +117,6 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#ff6b6b")
-        .attr("fill-opacity", 0.95)
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2);
 
@@ -121,51 +165,6 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         .on("blur", () => tooltip.style("opacity", 0))
         .on("keydown", (e) => { if(typeof createDataPointMovement === 'function') createDataPointMovement(e, bars); })
         .on("click", (e) => { if(typeof syncClicksBetweenDPs === 'function') syncClicksBetweenDPs(e, bars); });
-
-    chart
-        .selectAll(".bar-label")
-        .data(totals)
-        .join("text")
-        .attr("class", "bar-label")
-        .attr("x", d => xScale(d.total) + 5)
-        .attr("y", d => yScale(d.detectionMethod) + yScale.bandwidth() / 2)
-        .attr("dy", "0.35em")
-        .style("font-size", "12px")
-        .style("fill", "#333")
-        .text(d => d.total.toLocaleString());
-    chart
-        .append("g")
-        .call(d3.axisLeft(yScale));
-
-    chart
-        .append("g")
-        .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
-
-    chart
-        .append("text")
-        .attr("x", innerWidth / 2)
-        .attr("y", innerHeight + 44)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text(`Total ${metricLabel.toLowerCase()}`);
-
-    chart
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 50)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text("Camera type");
-
-    chart
-        .append("text")
-        .attr("x", 0)
-        .attr("y", -10)
-        .style("font-size", "13px")
-        .style("font-weight", "600")
-        .text(`Camera type with the highest ${metricLabel.toLowerCase()}`);
 
     // Right-click support
     addDataTableContextMenu(container.node(),

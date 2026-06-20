@@ -80,7 +80,18 @@ const drawJurisdictionDrugBar = (data) => {
         .attr("width", d => xScale(d.rate))
         .attr("fill", "#004B87");
 
-    // Create tooltip AFTER bars so it appears on top
+    chart.selectAll(".label")
+        .data(totals)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", d => xScale(d.rate) + 5)
+        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2 + 4)
+        .text(d => d.rate.toFixed(1))
+        .style("font-size", "11px")
+        .attr("fill", "#333");
+
+    // Create tooltip AFTER labels so it appears on top
     const tooltip = chart
         .append("g")
         .attr("class", "tooltip")
@@ -96,7 +107,6 @@ const drawJurisdictionDrugBar = (data) => {
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#EBA746")
-        .attr("fill-opacity", 0.95)
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2);
 
@@ -161,18 +171,7 @@ const drawJurisdictionDrugBar = (data) => {
         })
         .on("mouseleave", () => {
             tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        }); 
-
-    chart.selectAll(".label")
-        .data(totals)
-        .enter()
-        .append("text")
-        .attr("class", "label")
-        .attr("x", d => xScale(d.rate) + 5)
-        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2 + 4)
-        .text(d => d.rate.toFixed(1))
-        .style("font-size", "11px")
-        .attr("fill", "#333");
+        });
 
     // Attach right-click context menu
     addDataTableContextMenu(container.node(),

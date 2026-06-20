@@ -53,6 +53,52 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .attr("height", yScale.bandwidth())
         .attr("fill", "#0f2a45");
 
+    chart
+        .selectAll(".bar-label")
+        .data(totals)
+        .join("text")
+        .attr("class", "bar-label")
+        .attr("x", d => xScale(d.total) + 5)
+        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2)
+        .attr("dy", "0.35em")
+        .style("font-size", "12px")
+        .style("fill", "#333")
+        .text(d => d.total.toLocaleString());
+
+    chart
+        .append("g")
+        .call(d3.axisLeft(yScale));
+
+    chart
+        .append("g")
+        .attr("transform", `translate(0, ${innerHeight})`)
+        .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
+
+    chart
+        .append("text")
+        .attr("x", innerWidth / 2)
+        .attr("y", innerHeight + 44)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text(`Total ${metricLabel.toLowerCase()}`);
+
+    chart
+        .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -innerHeight / 2)
+        .attr("y", -margin.left + 50)
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .text("Jurisdiction");
+
+    chart
+        .append("text")
+        .attr("x", 0)
+        .attr("y", -10)
+        .style("font-size", "13px")
+        .style("font-weight", "600")
+        .text(`States with the highest ${metricLabel.toLowerCase()} in Australia`);
+
     // Rich tooltip
     const tooltip = chart
         .append("g")
@@ -68,7 +114,6 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#0f2a45")
-        .attr("fill-opacity", 0.95)
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2);
 
@@ -117,52 +162,6 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         .on("blur", () => tooltip.style("opacity", 0))
         .on("keydown", (e) => { if(typeof createDataPointMovement === 'function') createDataPointMovement(e, bars); })
         .on("click", (e) => { if(typeof syncClicksBetweenDPs === 'function') syncClicksBetweenDPs(e, bars); });
-
-    chart
-        .selectAll(".bar-label")
-        .data(totals)
-        .join("text")
-        .attr("class", "bar-label")
-        .attr("x", d => xScale(d.total) + 5)
-        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2)
-        .attr("dy", "0.35em")
-        .style("font-size", "12px")
-        .style("fill", "#333")
-        .text(d => d.total.toLocaleString());
-
-    chart
-        .append("g")
-        .call(d3.axisLeft(yScale));
-
-    chart
-        .append("g")
-        .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(xScale).ticks(6).tickFormat(d3.format("~s")));
-
-    chart
-        .append("text")
-        .attr("x", innerWidth / 2)
-        .attr("y", innerHeight + 44)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text(`Total ${metricLabel.toLowerCase()}`);
-
-    chart
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -innerHeight / 2)
-        .attr("y", -margin.left + 50)
-        .attr("text-anchor", "middle")
-        .style("font-size", "12px")
-        .text("Jurisdiction");
-
-    chart
-        .append("text")
-        .attr("x", 0)
-        .attr("y", -10)
-        .style("font-size", "13px")
-        .style("font-weight", "600")
-        .text(`States with the highest ${metricLabel.toLowerCase()} in Australia`);
 
     // Right-click support
     addDataTableContextMenu(container.node(),
