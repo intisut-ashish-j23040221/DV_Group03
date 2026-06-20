@@ -21,7 +21,7 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = isInt ? height : Math.max(currentInnerWidth, 400);
+    const w = isInt ? height : Math.max(currentInnerWidth, 100);
 
     const svg = container
         .append("svg")

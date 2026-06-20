@@ -19,7 +19,7 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = Math.max(currentInnerWidth, 400);
+    const w = Math.max(currentInnerWidth, 100);
 
     const xScale = d3.scaleLinear()
         .domain([0, d3.max(totals, d => d.total) || 0])

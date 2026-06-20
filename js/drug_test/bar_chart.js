@@ -1,4 +1,4 @@
-﻿const drawJurisdictionDrugBar = (data) => {
+const drawJurisdictionDrugBar = (data) => {
     const container = d3.select("#jurisdiction-drug-bar");
     if (container.empty()) {
         console.warn("Jurisdiction drug bar container not found");
@@ -26,7 +26,7 @@
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = Math.max(currentInnerWidth, 400);
+    const w = Math.max(currentInnerWidth, 100);
 
     const svg = container
         .append("svg")

@@ -12,7 +12,9 @@ d3.csv("data/fines.csv", d => ({
     month: +d.MONTH
 })).then(data => {
     console.log(data);
+    let currentFilters = { year: 'All', jurisdiction: 'All', metric: 'All' };
     const renderCharts = filters => {
+        currentFilters = filters;
         const selectedMetric = filters.metric || 'All';
 
         const filtered = data.filter(d => {
@@ -43,6 +45,20 @@ d3.csv("data/fines.csv", d => ({
             renderCharts(filters);
         });
     }
+
+    const debounce = (fn, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), delay);
+        };
+    };
+
+    const redrawCharts = debounce(() => {
+        renderCharts(currentFilters);
+    }, 120);
+
+    window.addEventListener('resize', redrawCharts);
 
     // Call functions after data is loaded
     // drawHistogram(data);

@@ -283,16 +283,25 @@ body {
 
 @media (max-width:1200px) {
 	.page-content {
-		grid-template-columns: 1fr;
+		flex-direction: column;
 	}
 
 	.dashboard-sidebar,
 	.dashboard-main {
 		min-width: 0;
+		width: 100%;
 	}
 
 	.chart-grid {
 		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+		grid-auto-rows: auto;
+		gap: 16px;
+	}
+
+	.chart-panel--large {
+		grid-column: 1;
+		min-height: 380px;
 	}
 }
 
@@ -302,9 +311,39 @@ body {
 	}
 	.kpi-cards {
 		flex-wrap: wrap;
-		min-width: 0
+		min-width: 0;
 	}
 	.chart-grid {
 		grid-template-columns: 1fr;
+		grid-template-rows: auto;
+		grid-auto-rows: auto;
+	}
+}
+
+@media (max-width: 600px) {
+	.chart-panel {
+		padding: 12px;
+		min-height: 320px;
+	}
+	.chart-panel--large {
+		min-height: 320px;
+	}
+	.chart-panel--medium {
+		min-height: 320px;
+	}
+	.responsive-svg-container {
+		min-height: 260px;
+	}
+	#breath-trend-line.responsive-svg-container {
+		min-height: 260px;
+	}
+	.welcome-container {
+		padding: 1.5rem;
+	}
+	.welcome-container h1 {
+		font-size: 1.6rem;
+	}
+	.welcome-container p {
+		font-size: 0.95rem;
 	}
 }

@@ -24,7 +24,7 @@ const drawBreathTrendStackedBar = (data) => {
     const containerWidth = container.node().getBoundingClientRect().width || width;
     // Increase right margin to 80 to make sure the right Y axis labels fit
     const currentInnerWidth = containerWidth - margin.left - 80; 
-    const w = Math.max(currentInnerWidth, 400);
+    const w = Math.max(currentInnerWidth, 100);
 
     const svg = container
         .append("svg")
