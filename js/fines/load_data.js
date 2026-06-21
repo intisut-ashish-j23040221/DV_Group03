@@ -31,7 +31,7 @@ d3.csv("data/fines.csv", d => ({
         if (typeof drawKPIs === 'function') drawKPIs(filtered, comparisonData, selectedMetric);
         drawJurisdictionSpeedingBar(filtered, selectedMetric);
         drawCameraSpeedingBar(filtered, selectedMetric);
-        drawFinesLineChart(filtered, selectedMetric);
+        drawFinesStreamgraph(filtered, selectedMetric);
         drawLocationStackedBar(filtered, selectedMetric);
         drawLocationHeatmap(filtered, selectedMetric);
     };
