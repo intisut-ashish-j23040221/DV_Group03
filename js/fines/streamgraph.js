@@ -90,6 +90,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .data(layers)
         .join("path")
         .attr("class", "stream-path")
+        .attr("data-metric", d => formatMetricLabel(d.key))
         .attr("d", area)
         .attr("fill", d => colorScale(d.key))
         .attr("stroke", "#ffffff")
@@ -233,18 +234,46 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         () => stackedData.map(sd => {
             const row = { 'Year': sd.year };
             metrics.forEach(m => {
-                row[formatMetricLabel(m)] = sd[m].toLocaleString();
+                row[formatMetricLabel(m)] = '$' + sd[m].toLocaleString();
             });
             return row;
         }),
         () => ['Year', ...metrics.map(m => formatMetricLabel(m))],
         'Fines Trend by Metric',
-        'Displays the yearly breakdown of fines across different enforcement categories in a table layout. Hover over any metric row in the chart streams to inspect specific values.',
+        'Displays the yearly breakdown of fines across different enforcement categories in a table layout. Click a year row to display a vertical timeline indicator on the chart.',
         (row, clone) => {
+            const cloneChart = d3.select(clone).select("g");
+            
+            // Remove existing indicator elements
+            cloneChart.selectAll(".year-indicator").remove();
+
             if (!row) {
-                d3.select(clone).selectAll('.stream-path').attr('opacity', 1);
                 return;
             }
+
+            const xPos = xScale(row.Year);
+
+            // Draw vertical dashed line marker at the selected year
+            cloneChart.append("line")
+                .attr("class", "year-indicator")
+                .attr("x1", xPos)
+                .attr("y1", 0)
+                .attr("x2", xPos)
+                .attr("y2", innerHeight)
+                .attr("stroke", "#111827")
+                .attr("stroke-width", "2px")
+                .attr("stroke-dasharray", "4 4");
+
+            // Add text year label at the top of the line
+            cloneChart.append("text")
+                .attr("class", "year-indicator")
+                .attr("x", xPos)
+                .attr("y", -6)
+                .attr("text-anchor", "middle")
+                .style("font-size", "11px")
+                .style("font-weight", "bold")
+                .style("fill", "#111827")
+                .text(row.Year);
         }
     );
 };

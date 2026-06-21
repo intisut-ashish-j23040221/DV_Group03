@@ -128,7 +128,7 @@
 						{ element: '.sidebar-panel--kpis', popover: { title: 'Financial Indicators', description: 'Quick overview of total fines and average amounts.', side: "right", align: 'start' }},
 						{ element: '#tour-fines-trend', popover: { title: 'Historical Fines', description: 'Track how fine amounts have changed over the years. You can click on legends to toggle series.', side: "bottom", align: 'center' }},
 						{ element: '#tour-fines-state', popover: { title: 'Top Jurisdictions', description: 'Identify states with the highest fine revenue.', side: "top", align: 'center' }},
-						{ element: '#tour-fines-camera', popover: { title: 'Detection Methods', description: 'See which camera types are capturing the most fines.', side: "top", align: 'center' }},
+						{ element: '#tour-fines-camera', popover: { title: 'Detection Methods', description: 'See which enforcement methods (like cameras or officer patrols) are generating the most fines.', side: "top", align: 'center' }},
 						{ popover: { title: 'Interactive Features', description: 'Remember, you can hover over elements for details, or right-click any chart to open a data table!', side: "center", align: 'center' }}
 					]
 				});

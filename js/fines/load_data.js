@@ -1,16 +1,54 @@
-//Load exercise 6 data and call the functions
-d3.csv("data/fines.csv", d => ({
-    year: +d.YEAR,
-    jurisdiction: d.JURISDICTION,
-    location: d.LOCATION,
-    ageGroup: d.AGE_GROUP,
-    metric: d.METRIC,
-    detectionMethod: d.DETECTION_METHOD,
-    fines: +d.FINES,
-    arrests: +d.ARRESTS,
-    charges: +d.CHARGES,
-    month: +d.MONTH
-})).then(data => {
+// Normalize jurisdiction names for merging
+const normalizeJurisdiction = (name) => {
+    const map = {
+        'New South Wales': 'NSW',
+        'Northern Territory': 'NT',
+        'South Australia': 'SA',
+        'Western Australia': 'WA',
+        'Australian Capital Territory': 'ACT',
+        'Tasmania': 'TAS',
+        'Queensland': 'QLD',
+        'Victoria': 'VIC'
+    };
+    return map[name.trim()] || name;
+};
+
+// Load both datasets and merge
+Promise.all([
+    d3.csv("data/fines.csv", d => ({
+        year: +d.YEAR,
+        jurisdiction: d.JURISDICTION,
+        location: d.LOCATION,
+        ageGroup: d.AGE_GROUP,
+        metric: d.METRIC,
+        detectionMethod: d.DETECTION_METHOD,
+        fines: +d.FINES,
+        arrests: +d.ARRESTS,
+        charges: +d.CHARGES,
+        month: +d.MONTH
+    })),
+    d3.csv("data/license_data.csv", d => ({
+        year: +d.Year,
+        jurisdiction: normalizeJurisdiction(d.Jurisdiction),
+        totalLicenses: +d.Total_License_Number
+    }))
+]).then(([finesData, licenseData]) => {
+    // Create lookup map for license data
+    const licenseMap = {};
+    licenseData.forEach(d => {
+        licenseMap[`${d.year}-${d.jurisdiction}`] = d.totalLicenses;
+    });
+
+    // Merge total licenses into each fine record
+    const data = finesData.map(d => {
+        const key = `${d.year}-${d.jurisdiction}`;
+        const totalLicenses = licenseMap[key] || 0;
+        return {
+            ...d,
+            totalLicenses
+        };
+    });
+
     console.log(data);
     let currentFilters = { year: 'All', jurisdiction: 'All', metric: 'All' };
     const renderCharts = filters => {
@@ -29,7 +67,7 @@ d3.csv("data/fines.csv", d => ({
         });
 
         if (typeof drawKPIs === 'function') drawKPIs(filtered, comparisonData, selectedMetric);
-        drawJurisdictionSpeedingBar(filtered, selectedMetric);
+        drawJurisdictionSpeedingMap(filtered, selectedMetric);
         drawCameraSpeedingBar(filtered, selectedMetric);
         drawFinesStreamgraph(filtered, selectedMetric);
         drawLocationStackedBar(filtered, selectedMetric);

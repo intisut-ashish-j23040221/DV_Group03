@@ -69,7 +69,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     // Remove any existing tooltips from the clone
     clone.querySelectorAll('.tooltip').forEach(el => el.remove());
     // Disable tooltip interactions in the cloned chart
-    clone.querySelectorAll('rect, circle').forEach(el => {
+    clone.querySelectorAll('rect, circle, path').forEach(el => {
         el.style.pointerEvents = 'none';
     });
     clone.querySelectorAll("g text.text-value-label").forEach(t => t.remove() );
@@ -229,9 +229,17 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
 
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
-    container.addEventListener('contextmenu', (e) => {
+    
+    // Remove existing handlers to prevent duplicate event accumulation on redrawing
+    if (container._contextMenuHandler) {
+        container.removeEventListener('contextmenu', container._contextMenuHandler);
+    }
+    
+    container._contextMenuHandler = (e) => {
         const data = dataFn();
         const columns = columnsFn();
         showChartDataTable(e, container, data, columns, title, explanation, onRowClick);
-    });
+    };
+    
+    container.addEventListener('contextmenu', container._contextMenuHandler);
 };

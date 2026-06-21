@@ -67,7 +67,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     // Remove any existing tooltips from the clone
     clone.querySelectorAll('.tooltip').forEach(el => el.remove());
     // Disable tooltip interactions in the cloned chart
-    clone.querySelectorAll('rect, circle').forEach(el => {
+    clone.querySelectorAll('rect, circle, path').forEach(el => {
         el.style.pointerEvents = 'none';
     });
     // Ensure the SVG inside the clone stretches to fill the wrapper proportionally
@@ -232,9 +232,22 @@ const triggerMenu = (e, dataFn, columnsFn, container, title, explanation, onRowC
 
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
+    
+    // Remove existing handlers to prevent duplicate event accumulation on redrawing
+    if (container._contextMenuHandler) {
+        container.removeEventListener('contextmenu', container._contextMenuHandler);
+    }
+    if (container._enterKeyHandler) {
+        container.removeEventListener('keydown', container._enterKeyHandler);
+    }
+    
     let params = [dataFn, columnsFn, container, title, explanation, onRowClick];
-    container.addEventListener('contextmenu', (e) => triggerMenu(e, ...params));
-    container.addEventListener("keydown", (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null)
+    
+    container._contextMenuHandler = (e) => triggerMenu(e, ...params);
+    container._enterKeyHandler = (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null;
+    
+    container.addEventListener('contextmenu', container._contextMenuHandler);
+    container.addEventListener("keydown", container._enterKeyHandler);
 };
 
 const syncClicksBetweenDPs = (e, dp) => {

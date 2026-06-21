@@ -73,6 +73,7 @@ const drawPositiveDrugBar = async (data) => {
         .data(australiaGeoJSON_DT.features)
         .enter().append("path")
         .attr("d", path)
+        .attr("data-jurisdiction", d => jurMap[d.properties.STATE_NAME || d.properties.name])
         .attr("fill", d => {
             const stateName = d.properties.STATE_NAME || d.properties.name;
             const jurCode = jurMap[stateName];
@@ -151,9 +152,9 @@ const drawPositiveDrugBar = async (data) => {
                 return;
             }
             d3.select(clone).selectAll('path')
-                .style('fill-opacity', function(d) {
-                    const stateName = d.properties.STATE_NAME || d.properties.name;
-                    return jurMap[stateName] === row.Jurisdiction ? 1 : 0.2;
+                .style('fill-opacity', function() {
+                    const stateName = d3.select(this).attr('data-jurisdiction');
+                    return stateName === row.Jurisdiction ? 1 : 0.2;
                 });
         }
     );
