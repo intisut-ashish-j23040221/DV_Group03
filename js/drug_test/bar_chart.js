@@ -79,7 +79,8 @@ const drawJurisdictionDrugBar = (data) => {
         .attr("y", d => yScale(d.jurisdiction))
         .attr("height", yScale.bandwidth())
         .attr("width", d => xScale(d.rate))
-        .attr("fill", "#004B87");
+        .attr("fill", "#004B87")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1");;
 
     chart.selectAll(".label")
         .data(totals)

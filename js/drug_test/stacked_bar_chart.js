@@ -278,8 +278,8 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
     chartType
         .on("mouseenter", handleHover)
         .on("focus", handleHover)
-        .on("mouseleave", tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
-        .on("blur", tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
         .on("keydown", (e) => createDataPointMovement(e, chartType))
         .on("click", (e) => syncClicksBetweenDPs(e, chartType));
 
