@@ -124,15 +124,17 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .selectAll("text")
         .style("font-size", "11px");
 
+    const yearWidth = (xScale(years[1]) - xScale(years[0]));
+
     // invisible year points
     const yearTrackers = chart.append("g")
         .attr("class", "year-trackers")
         .selectAll("rect")
         .data(years)
         .join("rect")
-        .attr("x", year => xScale(year) - (xScale.step ? xScale.step() / 2 : 10)) // center it over the year
+        .attr("x", year => xScale(year) - yearWidth / 2)
         .attr("y", 0)
-        .attr("width", xScale.step ? xScale.step() : 20)
+        .attr("width", yearWidth)
         .attr("height", innerHeight)
         .style("fill", "transparent") // Invisible to the eye!
         .style("cursor", "pointer")
@@ -141,7 +143,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
     const focusLine = chart.append("line")
         .attr("y1", 0)
         .attr("y2", innerHeight)
-        .style("stroke", "#ff9800") 
+        .style("stroke", "#000") 
         .style("stroke-width", "2px")
         .style("stroke-dasharray", "4 4")
         .style("visibility", "hidden");
@@ -177,9 +179,9 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("pointer-events", "none")
         .style("z-index", 9999);
 
-    tooltip.append("rect")
+    const tooltipShape = tooltip.append("rect")
         .attr("width", 225)
-        .attr("height", 70)
+        .attr("height", metric === "All" ? 100 : 70)
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#333")
@@ -269,6 +271,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         // Smoothly transform your SVG tooltip container to the correct coordinate slot
         tooltip
             .style("visibility", "visible")
+            .style("opacity", 1)
             .attr("transform", `translate(${tx}, ${ty})`);
     };
 
