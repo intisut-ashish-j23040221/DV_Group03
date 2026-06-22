@@ -124,15 +124,17 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .selectAll("text")
         .style("font-size", "11px");
 
+    const yearWidth = (xScale(years[1]) - xScale(years[0]));
+
     // invisible year points
     const yearTrackers = chart.append("g")
         .attr("class", "year-trackers")
         .selectAll("rect")
         .data(years)
         .join("rect")
-        .attr("x", year => xScale(year) - (xScale.step ? xScale.step() / 2 : 10)) // center it over the year
+        .attr("x", year => xScale(year) - yearWidth / 2)
         .attr("y", 0)
-        .attr("width", xScale.step ? xScale.step() : 20)
+        .attr("width", yearWidth)
         .attr("height", innerHeight)
         .style("fill", "transparent") // Invisible to the eye!
         .style("cursor", "pointer")
