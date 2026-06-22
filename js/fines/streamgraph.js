@@ -110,12 +110,10 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("font-size", "11px");
 
     // invisible year points
-    const uniqueYears = Array.from(new Set(chartData.map(d => d.year))).sort();
-
     const yearTrackers = chart.append("g")
         .attr("class", "year-trackers")
         .selectAll("rect")
-        .data(uniqueYears)
+        .data(years)
         .join("rect")
         .attr("x", year => xScale(year) - (xScale.step ? xScale.step() / 2 : 10)) // center it over the year
         .attr("y", 0)
