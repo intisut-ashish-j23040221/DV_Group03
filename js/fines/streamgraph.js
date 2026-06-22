@@ -179,9 +179,9 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("pointer-events", "none")
         .style("z-index", 9999);
 
-    tooltip.append("rect")
+    const tooltipShape = tooltip.append("rect")
         .attr("width", 225)
-        .attr("height", 70)
+        .attr("height", metric === "All" ? 100 : 70)
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#333")
