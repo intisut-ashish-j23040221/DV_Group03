@@ -123,6 +123,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     thead.appendChild(headerRow);
     table.appendChild(thead);
 
+    const selectedRows = new Set();
     const tbody = document.createElement('tbody');
     data.forEach((row, idx) => {
         const tr = document.createElement('tr');
@@ -139,17 +140,25 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         });
 
         tr.addEventListener('click', () => {
-            Array.from(tbody.querySelectorAll('tr')).forEach((rowEl, i) => {
-                rowEl.style.background = rowEl === tr ? '#e0f2fe' : i % 2 === 0 ? '#fafafa' : 'white';
-            });
+            if (selectedRows.has(row)) {
+                selectedRows.delete(row);
+                tr.style.background = idx % 2 === 0 ? '#fafafa' : 'white';
+            } else {
+                selectedRows.add(row);
+                tr.style.background = '#e0f2fe';
+            }
             if (onRowClick) {
-                onRowClick(row, clone, tr);
+                onRowClick(Array.from(selectedRows), clone, tr);
             }
         });
 
-        tr.addEventListener('mouseover', () => tr.style.background = '#f3f4f6');
+        tr.addEventListener('mouseover', () => {
+            if (!selectedRows.has(row)) {
+                tr.style.background = '#f3f4f6';
+            }
+        });
         tr.addEventListener('mouseout', () => {
-            if (tr !== document.activeElement) {
+            if (!selectedRows.has(row)) {
                 tr.style.background = idx % 2 === 0 ? '#fafafa' : 'white';
             }
         });
@@ -173,11 +182,12 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         cursor: pointer;
     `;
     resetBtn.onclick = () => {
+        selectedRows.clear();
         Array.from(tbody.querySelectorAll('tr')).forEach((rowEl, j) => {
             rowEl.style.background = j % 2 === 0 ? '#fafafa' : 'white';
         });
         if (onRowClick) {
-            onRowClick(null, clone, null);
+            onRowClick([], clone, null);
         }
     };
     buttonRow.appendChild(resetBtn);

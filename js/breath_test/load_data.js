@@ -64,7 +64,9 @@ Promise.all([
         currentFilters = filters;
         // Filter based on Year and Jurisdiction selection
         const filtered = data.filter(d => {
-            return (filters.year === 'All' || filters.year === 'all' || +filters.year === d.year)
+            const matchesYear = (filters.year === 'All' || filters.year === 'all') || 
+                               (Array.isArray(filters.year) && (filters.year.includes(d.year) || filters.year.includes(String(d.year))));
+            return matchesYear
                 && (filters.jurisdiction === 'All' || filters.jurisdiction === 'all' || filters.jurisdiction === d.jurisdiction);
         });
 

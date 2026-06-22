@@ -173,15 +173,16 @@ const drawJurisdictionSpeedingMap = async (data, metric = 'All') => {
             () => ['Jurisdiction', 'Total Fines', '% of total'],
             'Total Fines by Jurisdiction',
             'Map displaying the distribution of traffic fines across states. Darker blue regions indicate higher overall fines.',
-            (row, clone) => {
-                if (!row) {
+            (selectedRows, clone) => {
+                if (!selectedRows || selectedRows.length === 0) {
                     d3.select(clone).selectAll('path').style('fill-opacity', 1);
                     return;
                 }
+                const activeJurs = selectedRows.map(r => r.Jurisdiction);
                 d3.select(clone).selectAll('path')
                     .style('fill-opacity', function() {
                         const jurCode = d3.select(this).attr('data-jurisdiction');
-                        return jurCode === row.Jurisdiction ? 1 : 0.2;
+                        return activeJurs.includes(jurCode) ? 1 : 0.2;
                     });
             }
         );

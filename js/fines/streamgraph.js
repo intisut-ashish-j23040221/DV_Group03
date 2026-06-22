@@ -37,8 +37,15 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
     const w = Math.max(currentInnerWidth, 100);
 
     // Set up scales
+    let xDomain = d3.extent(years);
+    if (years.length === 1) {
+        xDomain = [years[0] - 1, years[0] + 1];
+    } else if (years.length === 0) {
+        xDomain = [2018, 2022];
+    }
+
     const xScale = d3.scaleLinear()
-        .domain(d3.extent(years))
+        .domain(xDomain)
         .range([0, w]);
 
     const stack = d3.stack()
@@ -98,9 +105,16 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .attr("opacity", 1);
 
     // Draw axes
+    const xAxis = d3.axisBottom(xScale).tickFormat(d3.format("d"));
+    if (years.length > 0) {
+        xAxis.tickValues(years);
+    } else {
+        xAxis.ticks(5);
+    }
+
     chart.append("g")
         .attr("transform", `translate(0, ${innerHeight})`)
-        .call(d3.axisBottom(xScale).tickFormat(d3.format("d")).ticks(years.length))
+        .call(xAxis)
         .selectAll("text")
         .style("font-size", "11px");
 
@@ -241,39 +255,42 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         () => ['Year', ...metrics.map(m => formatMetricLabel(m))],
         'Fines Trend by Metric',
         'Displays the yearly breakdown of fines across different enforcement categories in a table layout. Click a year row to display a vertical timeline indicator on the chart.',
-        (row, clone) => {
+        (selectedRows, clone) => {
             const cloneChart = d3.select(clone).select("g");
             
             // Remove existing indicator elements
             cloneChart.selectAll(".year-indicator").remove();
 
-            if (!row) {
+            if (!selectedRows || selectedRows.length === 0) {
                 return;
             }
 
-            const xPos = xScale(row.Year);
+            selectedRows.forEach(row => {
+                const xPos = xScale(row.Year);
+                if (isNaN(xPos)) return;
 
-            // Draw vertical dashed line marker at the selected year
-            cloneChart.append("line")
-                .attr("class", "year-indicator")
-                .attr("x1", xPos)
-                .attr("y1", 0)
-                .attr("x2", xPos)
-                .attr("y2", innerHeight)
-                .attr("stroke", "#111827")
-                .attr("stroke-width", "2px")
-                .attr("stroke-dasharray", "4 4");
+                // Draw vertical dashed line marker at the selected year
+                cloneChart.append("line")
+                    .attr("class", "year-indicator")
+                    .attr("x1", xPos)
+                    .attr("y1", 0)
+                    .attr("x2", xPos)
+                    .attr("y2", innerHeight)
+                    .attr("stroke", "#111827")
+                    .attr("stroke-width", "2px")
+                    .attr("stroke-dasharray", "4 4");
 
-            // Add text year label at the top of the line
-            cloneChart.append("text")
-                .attr("class", "year-indicator")
-                .attr("x", xPos)
-                .attr("y", -6)
-                .attr("text-anchor", "middle")
-                .style("font-size", "11px")
-                .style("font-weight", "bold")
-                .style("fill", "#111827")
-                .text(row.Year);
+                // Add text year label at the top of the line
+                cloneChart.append("text")
+                    .attr("class", "year-indicator")
+                    .attr("x", xPos)
+                    .attr("y", -6)
+                    .attr("text-anchor", "middle")
+                    .style("font-size", "11px")
+                    .style("font-weight", "bold")
+                    .style("fill", "#111827")
+                    .text(row.Year);
+            });
         }
     );
 };

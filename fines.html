@@ -28,7 +28,15 @@
             <section class="sidebar-panel sidebar-panel--filters">
                 <h2>Filter options <button id="fines-tour-btn" class="btn-help" title="Take a tour">?</button></h2>
                 <div class="filters" id="filters-controls">
-                    <label>Year: <select id="filter-year"></select></label>
+                    <label>Year:
+                        <div class="custom-dropdown" id="filter-year-container">
+                            <button class="dropdown-trigger" id="filter-year-trigger" type="button">
+                                <span class="trigger-text">All Years</span>
+                                <span class="trigger-arrow">▼</span>
+                            </button>
+                            <div class="dropdown-menu" id="filter-year-menu"></div>
+                        </div>
+                    </label>
                     <label>Jurisdiction: <select id="filter-jurisdiction"></select></label>
                     <label>Metric: <select id="filter-metric"></select></label>
                     <button id="filter-reset" class="btn-reset">Reset View</button>

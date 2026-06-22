@@ -352,14 +352,15 @@ const drawBreathTrendStackedBar = (data) => {
         () => ['Year', 'Total Conducted', 'Positive Cases', 'Non-positive Cases', 'Positive Rate (%)'],
         'Breath Tests Conducted vs Positive Results',
         'Displays total breath tests conducted (bars) and positive results (line) by year. Uses dual axes to ensure the small positive counts are clearly visible. Formula: Positive Rate = (Positive Cases ÷ Total Conducted) × 100.',
-        (row, clone) => {
-            if (!row) {
+        (selectedRows, clone) => {
+            if (!selectedRows || selectedRows.length === 0) {
                 d3.select(clone).selectAll('rect, circle').attr('opacity', 1);
                 return;
             }
+            const activeYears = selectedRows.map(r => String(r.Year));
             d3.select(clone).selectAll('rect, circle')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-year') === String(row.Year) ? 1 : 0.2;
+                    return activeYears.includes(d3.select(this).attr('data-year')) ? 1 : 0.2;
                 });
         }
     );

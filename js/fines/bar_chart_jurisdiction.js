@@ -172,14 +172,15 @@ const drawJurisdictionSpeedingBar = (data, metric = 'All') => {
         () => ['Jurisdiction', `Total ${metricLabel}`],
         'States with the Highest Fines',
         `A comparison of total ${metricLabel.toLowerCase()} across different Australian states. Hover over a row to highlight that state on the bar chart.`,
-        (row, clone) => {
-            if (!row) {
+        (selectedRows, clone) => {
+            if (!selectedRows || selectedRows.length === 0) {
                 d3.select(clone).selectAll('.bar').attr('opacity', 1);
                 return;
             }
+            const activeJurs = selectedRows.map(r => r.Jurisdiction);
             d3.select(clone).selectAll('.bar')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-jurisdiction') === row.Jurisdiction ? 1 : 0.2;
+                    return activeJurs.includes(d3.select(this).attr('data-jurisdiction')) ? 1 : 0.2;
                 });
         }
     );

@@ -255,14 +255,15 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
         () => ['Enforcement Method', 'Share of Fines', `Total Fines (${metricLabel})`],
         'Fines Captured by Detection Method',
         `An analysis of traffic fine enforcement methods showing percentage share of total revenue. Hover over a row to highlight that method on the chart.`,
-        (row, clone) => {
-            if (!row) {
+        (selectedRows, clone) => {
+            if (!selectedRows || selectedRows.length === 0) {
                 d3.select(clone).selectAll('circle').attr('opacity', 1);
                 return;
             }
+            const activeMethods = selectedRows.map(r => r['Enforcement Method']);
             d3.select(clone).selectAll('circle')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-method') === row['Enforcement Method'] ? 1 : 0.2;
+                    return activeMethods.includes(d3.select(this).attr('data-method')) ? 1 : 0.2;
                 });
         }
     );

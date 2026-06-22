@@ -8,29 +8,38 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
 
     const metricLabel = formatMetricLabel(metric);
     const years = Array.from(new Set(data.map(d => d.year))).sort((a, b) => a - b);
-    const comparisonYears = Array.from(new Set(comparisonData.map(d => d.year))).sort((a, b) => a - b);
-    const latestYear = years[years.length - 1];
-    const previousYearCandidates = comparisonYears.filter(year => year < latestYear);
-    const previousYear = previousYearCandidates.length > 0
-        ? previousYearCandidates[previousYearCandidates.length - 1]
-        : null;
+    if (years.length === 0) return;
 
-    const currentYearData = data.filter(d => d.year === latestYear);
-    const previousYearData = previousYear === null ? [] : comparisonData.filter(d => d.year === previousYear);
+    const minY = years[0];
+    const maxY = years[years.length - 1];
+    const rangeLength = maxY - minY + 1;
+
+    const previousYears = [];
+    for (let y = minY - rangeLength; y < minY; y++) {
+        previousYears.push(y);
+    }
+
+    const currentYearData = data;
+    const previousYearData = comparisonData.filter(d => previousYears.includes(d.year));
+
+    const latestYearLabel = years.length > 1 ? `${minY}-${maxY}` : String(minY);
+    const previousYearLabel = previousYears.length > 1 
+        ? `${previousYears[0]}-${previousYears[previousYears.length - 1]}` 
+        : (previousYears.length === 1 ? String(previousYears[0]) : null);
 
     const totalInfringements = d3.sum(currentYearData, d => d.fines || 0);
     const previousTotalInfringements = d3.sum(previousYearData, d => d.fines || 0);
 
     const formatTrendText = (delta, yearLabel) => {
         if (delta === null) {
-            return `N/A ${yearLabel === null ? 'vs previous year' : `vs ${yearLabel}`}`;
+            return `N/A ${yearLabel === null ? 'vs previous period' : `vs ${yearLabel}`}`;
         }
 
-        return `${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(2)}% ${yearLabel === null ? 'vs previous year' : `vs ${yearLabel}`}`;
+        return `${delta >= 0 ? '▲' : '▼'} ${Math.abs(delta).toFixed(2)}% ${yearLabel === null ? 'vs previous period' : `vs ${yearLabel}`}`;
     };
 
     const changeValue = totalInfringements - previousTotalInfringements;
-    const hasComparison = previousYear !== null && previousTotalInfringements > 0;
+    const hasComparison = previousYearLabel !== null && previousTotalInfringements > 0;
     const changePercent = hasComparison
         ? (changeValue / previousTotalInfringements) * 100
         : null;
@@ -66,8 +75,8 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
         .attr('class', 'kpi-main-card')
         .html(`
             <div class="kpi-value">${totalInfringements.toLocaleString()}</div>
-            <div class="kpi-sub">${metricLabel}, ${latestYear}</div>
-            <div class="kpi-trend ${changeClass}">${changePercent === null ? 'N/A' : `${changeArrow} ${Math.abs(changePercent).toFixed(2)}%`} ${previousYear === null ? 'vs previous year' : `vs ${previousYear}`}</div>
+            <div class="kpi-sub">${metricLabel}, ${latestYearLabel}</div>
+            <div class="kpi-trend ${changeClass}">${changePercent === null ? 'N/A' : `${changeArrow} ${Math.abs(changePercent).toFixed(2)}%`} ${previousYearLabel === null ? 'vs previous period' : `vs ${previousYearLabel}`}</div>
         `);
 
     // Cards: Police fines, Camera fines, Arrests/Charges
@@ -75,24 +84,24 @@ const drawKPIs = (data, comparisonData = data, metric = 'All') => {
     policeCard.html(`
         <div class="kpi-card-label">Police fines</div>
         <div class="kpi-card-value">${policeFines.toLocaleString()}</div>
-        <div class="kpi-card-trend ${policeDelta === null ? 'kpi-change--flat' : (policeDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(policeDelta, previousYear)}</div>
+        <div class="kpi-card-trend ${policeDelta === null ? 'kpi-change--flat' : (policeDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(policeDelta, previousYearLabel)}</div>
     `);
 
     const cameraCard = containerCards.append('div').attr('class', 'kpi-card');
     cameraCard.html(`
         <div class="kpi-card-label">Camera fines</div>
         <div class="kpi-card-value">${cameraFines.toLocaleString()}</div>
-        <div class="kpi-card-trend ${cameraDelta === null ? 'kpi-change--flat' : (cameraDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(cameraDelta, previousYear)}</div>
+        <div class="kpi-card-trend ${cameraDelta === null ? 'kpi-change--flat' : (cameraDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(cameraDelta, previousYearLabel)}</div>
     `);
 
     const miscCard = containerCards.append('div').attr('class', 'kpi-card');
     miscCard.html(`
         <div class="kpi-card-sub">Arrests</div>
         <div class="kpi-card-small">${arrests.toLocaleString()}</div>
-        <div class="kpi-card-trend ${arrestsDelta === null ? 'kpi-change--flat' : (arrestsDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(arrestsDelta, previousYear)}</div>
+        <div class="kpi-card-trend ${arrestsDelta === null ? 'kpi-change--flat' : (arrestsDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(arrestsDelta, previousYearLabel)}</div>
         
         <div class="kpi-card-sub" style="margin-top: 10px;">Charges</div>
         <div class="kpi-card-small">${charges.toLocaleString()}</div>
-        <div class="kpi-card-trend ${chargesDelta === null ? 'kpi-change--flat' : (chargesDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(chargesDelta, previousYear)}</div>
+        <div class="kpi-card-trend ${chargesDelta === null ? 'kpi-change--flat' : (chargesDelta >= 0 ? 'kpi-change--up' : 'kpi-change--down')}">${formatTrendText(chargesDelta, previousYearLabel)}</div>
     `);
 };
