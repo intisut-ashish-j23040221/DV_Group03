@@ -109,8 +109,8 @@
 							popoverContainer.setAttribute('tabindex', '-1');
 							popoverContainer.focus();
 
-							// 3. Set up the focus trap for this step
-							setupPopoverFocusTrap(popoverContainer);
+							// // 3. Set up the focus trap for this step
+							// setupPopoverFocusTrap(popoverContainer);
 						}, 50);
 					}
 				});

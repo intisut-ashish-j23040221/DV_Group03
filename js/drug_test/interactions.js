@@ -146,7 +146,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         columns.forEach(col => {
             const td = document.createElement('td');
             const value = row[col];
-            td.textContent = typeof value === 'number' ? value.toLocaleString() : value;
+            td.textContent = (typeof value === 'number' && col?.toLowerCase() !== "year") ? value.toLocaleString() : value;
             td.style.cssText = 'padding: 10px; color: #374151;';
             tr.appendChild(td);
         });
