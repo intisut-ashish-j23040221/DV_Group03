@@ -6,9 +6,10 @@ const drawPositiveDrugBar = async (data) => {
 
     if (data.length === 0) {
         container.html("");
-        container.attr("tabindex", "0"); // for keyboard accessibility
         return;
     }
+
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     // 1. Data Aggregation
     const jurisdictionData = Array.from(d3.rollups(

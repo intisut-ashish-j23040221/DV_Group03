@@ -227,6 +227,12 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     document.addEventListener('keydown', escHandler);
 };
 
+const triggerMenu = (e, dataFn, columnsFn, container, title, explanation, onRowClick) => {
+    const data = dataFn();
+    const columns = columnsFn();
+    showChartDataTable(e, container, data, columns, title, explanation, onRowClick)
+}
+
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
     
@@ -234,14 +240,14 @@ const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanatio
     if (container._contextMenuHandler) {
         container.removeEventListener('contextmenu', container._contextMenuHandler);
     }
+
+    let params = [dataFn, columnsFn, container, title, explanation, onRowClick];
     
-    container._contextMenuHandler = (e) => {
-        const data = dataFn();
-        const columns = columnsFn();
-        showChartDataTable(e, container, data, columns, title, explanation, onRowClick);
-    };
-    
+    container._contextMenuHandler = (e) => triggerMenu(e, ...params);
+    container._enterKeyHandler = (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null;
+
     container.addEventListener('contextmenu', container._contextMenuHandler);
+    container.addEventListener("keydown", container._enterKeyHandler);
 };
 
 

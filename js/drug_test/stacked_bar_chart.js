@@ -69,7 +69,8 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .attr("width", xScale.bandwidth())
         .attr("data-year", d => d.data.year)
         .attr("data-key", d => d.key)
-        .attr("fill", d => colorScale(d.key));
+        .attr("fill", d => colorScale(d.key))
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); // keyboard accessible;
 
     const labels = chart.append("g")
         .selectAll("text")
