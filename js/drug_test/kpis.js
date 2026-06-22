@@ -12,16 +12,24 @@ const drawKPIs = (data, comparisonData = data) => {
     }
 
     const years = Array.from(new Set(data.map(d => d.year))).sort((a, b) => a - b);
-    const comparisonYears = Array.from(new Set(comparisonData.map(d => d.year))).sort((a, b) => a - b);
-    const latestYear = years[years.length - 1];
-    
-    const previousYearCandidates = comparisonYears.filter(year => year < latestYear);
-    const previousYear = previousYearCandidates.length > 0
-        ? previousYearCandidates[previousYearCandidates.length - 1]
-        : null;
+    if (years.length === 0) return;
 
-    const currentYearData = data.filter(d => d.year === latestYear);
-    const previousYearData = previousYear === null ? [] : comparisonData.filter(d => d.year === previousYear);
+    const minY = years[0];
+    const maxY = years[years.length - 1];
+    const rangeLength = maxY - minY + 1;
+
+    const previousYears = [];
+    for (let y = minY - rangeLength; y < minY; y++) {
+        previousYears.push(y);
+    }
+
+    const currentYearData = data;
+    const previousYearData = comparisonData.filter(d => previousYears.includes(d.year));
+
+    const latestYearLabel = years.length > 1 ? `${minY}-${maxY}` : String(minY);
+    const previousYearLabel = previousYears.length > 1 
+        ? `${previousYears[0]}-${previousYears[previousYears.length - 1]}` 
+        : (previousYears.length === 1 ? String(previousYears[0]) : null);
 
     const totalConducted = d3.sum(currentYearData, d => d.totalConducted || 0);
     const previousTotalConducted = d3.sum(previousYearData, d => d.totalConducted || 0);
@@ -33,8 +41,8 @@ const drawKPIs = (data, comparisonData = data) => {
     const previousAvgPercent = previousTotalConducted > 0 ? ((totalPreviousPositive / previousTotalConducted) * 100) : null;
     const positivePercentDelta = previousAvgPercent === null ? null : (avgPercent - previousAvgPercent);
     const positivePercentTrendText = previousAvgPercent === null
-        ? 'N/A vs previous year'
-        : `${positivePercentDelta >= 0 ? '▲' : '▼'} ${Math.abs(positivePercentDelta).toFixed(2)}% vs ${previousYear}`;
+        ? 'N/A vs previous period'
+        : `${positivePercentDelta >= 0 ? '▲' : '▼'} ${Math.abs(positivePercentDelta).toFixed(2)}% vs ${previousYearLabel}`;
     const positivePercentTrendClass = positivePercentDelta === null
         ? 'kpi-change--flat'
         : positivePercentDelta > 0
@@ -62,15 +70,20 @@ const drawKPIs = (data, comparisonData = data) => {
 
     const formatDeltaTrendText = (percentDelta, yearLabel) => {
         if (percentDelta === null) {
-            return `N/A vs ${yearLabel}`;
+            return `N/A vs ${yearLabel === null ? 'previous period' : yearLabel}`;
         }
         return `${percentDelta >= 0 ? '▲' : '▼'} ${Math.abs(percentDelta).toFixed(2)}% vs ${yearLabel}`;
     };
 
     // Main KPI block - follow the same structure as the speeding/fines KPIs
-    const trendHtml = previousYear !== null
-        ? (function(){ return previousTotalConducted === 0 ? 'N/A vs previous year' : `${totalConducted - previousTotalConducted >= 0 ? '▲' : '▼'} ${Math.abs(((totalConducted - previousTotalConducted)/previousTotalConducted)*100).toFixed(2)}% vs ${previousYear}` })()
-        : 'N/A vs previous year';
+    const changeVal = totalConducted - previousTotalConducted;
+    const changePct = previousTotalConducted > 0 ? (changeVal / previousTotalConducted) * 100 : null;
+    const changeClass = changePct === null ? 'kpi-change--flat' : (changePct > 0 ? 'kpi-change--up' : 'kpi-change--down');
+    const changeArrow = changePct === null ? '' : (changePct > 0 ? '▲' : '▼');
+    
+    const trendText = changePct === null 
+        ? 'N/A vs previous period' 
+        : `${changeArrow} ${Math.abs(changePct).toFixed(2)}% vs ${previousYearLabel}`;
 
     // create main card using the same classes as other pages so CSS matches
     containerMain
@@ -78,16 +91,16 @@ const drawKPIs = (data, comparisonData = data) => {
         .attr('class', 'kpi-main-card')
         .html(`
             <div class="kpi-value">${d3.format(",")(totalConducted)}</div>
-            <div class="kpi-sub">Random breath tests conducted, ${latestYear}</div>
-            <div class="kpi-trend">${trendHtml}</div>
+            <div class="kpi-sub">Drug tests conducted, ${latestYearLabel}</div>
+            <div class="kpi-trend ${changeClass}">${trendText}</div>
         `);
 
     // Positive rate card on the right
     const positiveRate = containerCards.append('div').attr('class', 'kpi-card kpi-card-positive');
     positiveRate.html(`
         <div class="kpi-card-small">${avgPercent}%</div>
-        <div class="kpi-card-label">Positive breath tests</div>
-        <div class="kpi-card-sub">${latestYear}</div>
+        <div class="kpi-card-label">Positive drug tests</div>
+        <div class="kpi-card-sub">${latestYearLabel}</div>
         <div class="kpi-card-trend ${positivePercentTrendClass}">${positivePercentTrendText}</div>
     `);
 
@@ -99,21 +112,21 @@ const drawKPIs = (data, comparisonData = data) => {
                 <div>
                     <div class="kpi-summary-value">${d3.format(",")(totalFines)}</div>
                     <div class="kpi-card-label">Fines</div>
-                    <div class="kpi-card-trend ${finesDeltaClass}">${formatDeltaTrendText(finesDelta, previousYear)}</div>
+                    <div class="kpi-card-trend ${finesDeltaClass}">${formatDeltaTrendText(finesDelta, previousYearLabel)}</div>
                 </div>
             </div>
             <div class="kpi-summary-item">
                 <div>
                     <div class="kpi-summary-value">${d3.format(",")(totalArrests)}</div>
                     <div class="kpi-card-label">Arrests</div>
-                    <div class="kpi-card-trend ${arrestsDeltaClass}">${formatDeltaTrendText(arrestsDelta, previousYear)}</div>
+                    <div class="kpi-card-trend ${arrestsDeltaClass}">${formatDeltaTrendText(arrestsDelta, previousYearLabel)}</div>
                 </div>
             </div>
             <div class="kpi-summary-item">
                 <div>
                     <div class="kpi-summary-value">${d3.format(",")(totalCharges)}</div>
                     <div class="kpi-card-label">Charges</div>
-                    <div class="kpi-card-trend ${chargesDeltaClass}">${formatDeltaTrendText(chargesDelta, previousYear)}</div>
+                    <div class="kpi-card-trend ${chargesDeltaClass}">${formatDeltaTrendText(chargesDelta, previousYearLabel)}</div>
                 </div>
             </div>
         </div>

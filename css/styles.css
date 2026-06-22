@@ -1,9 +1,16 @@
+:root {
+	--black: #1a202c;
+	--yellow-bg: #f8f9fa;
+	--yellow: #eeffee;
+	--dark-green: #053b21;
+	--brown: #212529;
+}
+
 /* make the width sizing include the padding and border */
 * {
 	box-sizing: border-box;
 }
 
-/* set the default style for the webpage */
 body {
 	margin: 0;
 	color: var(--black);
@@ -20,12 +27,12 @@ h2 {
 }
 
 .site-header {
-	position: sticky; /*make the header always stay at the top when scrolling */
+	position: sticky; 
 	top: 0;
 	display: flex; 
-	align-items: center; /*align the items at the same height position*/
-	justify-content: space-between; /*so the logo placed -> left and navigation -> right */
-	padding: 0.8rem 1.4rem; /*give some space for the logo and navigation bar, to make it not too close to the edge  */
+	align-items: center;
+	justify-content: space-between;
+	padding: 0.8rem 1.4rem; 
 	background-color: #eeffee;
 	border-bottom: 2px solid black;
 	border-radius: 0 0 5px 5px
@@ -34,34 +41,33 @@ h2 {
 .logo-button {
 	display: inline-flex;
 	align-items: center;
-	gap: 0.65rem; /* add space between the logo and the text */
 	color: inherit;
 	text-decoration: none;  /* remove url line */
 	font-weight: 700;
-	border-radius: 999px; /* the border is a circle, which be shown when hover at the Logo or its text */
-	padding: 0.25rem 0.75rem 0.25rem 0.25rem; 
-	transition: transform 0.2s ease, background-color 0.2s ease; /* timer of the animation */
+	border-radius: 999px; 
+	padding: 0.2rem; 
+	transition: transform 0.2s ease, background-color 0.2s ease; 
 }
 
 .logo-button img {
-	width: 42px;
-	height: 42px;
-	object-fit: contain; /* To make the image is fit nicely in the defined container */
+	width: 400px;
+	height: 100px;
+	object-fit: contain;
 }
 
 .logo-button:hover,
 .logo-button:focus-visible {
-	transform: translateY(-1px); /* make a going up animation when hover or focus on the logo */
+	transform: translateY(-1px);
 	background-color: var(--yellow);
 	outline: none;
 }
 
 .top-nav {
-	flex-shrink: 0; /* prevent the nav bar from compressing when screen size is small*/
+	flex-shrink: 0; 
 }	
 
 .nav-menu {
-	list-style: none; /* remove the default bullet points from the list */
+	list-style: none; 
 	display: flex;
 	gap: 0.5rem;
 	margin: 0;
@@ -69,7 +75,7 @@ h2 {
 }
 
 .nav-link {
-	display: inline-block; /* It make the nav link is align horizontally with custom padding and border*/
+	display: inline-block; 
 	color: var(--black);
 	text-decoration: none;
 	font-weight: 700;
@@ -81,19 +87,161 @@ h2 {
 
 .nav-link:hover,
 .nav-link:focus-visible {
-	background-color: var(--yellow);
+	background-color: #084f30ad;
 	transform: translateY(-1px);
-	outline: none; /* If the user use TAB key and hover on the nav link, use our custom focus style instead of the default one*/
+	outline: none; 
 }
 
 .nav-link.is-active {
-	background-color: var(--dark-yellow);
-	border-color: var(--brown);
-	box-shadow: inset 0 -2px 0 var(--brown); /* add a shadow at the bottom of nav link for current active page */
+	background-color: var(--dark-green);
+	color: #ffffff;
+	border-color: var(--dark-green);
+	box-shadow: inset 0 -2px 0 var(--dark-green);
 }
 
 .page-content {
-	max-width: 100%; /*set a max width for the content */
-	margin: 0; /* centre the content horizontally automatically */
-	padding: 2rem 1rem 2.5rem;
+	max-width: 100%; 
+	margin: 0; 
+	padding: 1rem 1rem 1.5rem;
+}
+
+
+.home-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 120px);
+    text-align: center;
+    padding: 1rem;
+}
+
+.welcome-container {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(6, 47, 86, 0.12);
+    max-width: 750px;
+    width: 100%;
+    margin-bottom: 2rem;
+    border: 1px solid #ebedf0;
+}
+
+.welcome-container h1 {
+    font-size: 2.2rem;
+    color: #062f56;
+    margin-bottom: 1rem;
+    font-family: "Rockwell", "Georgia", serif;
+}
+
+.welcome-container p {
+    font-size: 1.1rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.btn-first-time {
+    background: #062f56;
+    color: white;
+    padding: 1rem 2.2rem;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(6, 47, 86, 0.25);
+    display: inline-block;
+}
+
+.btn-first-time:hover {
+    transform: translateY(-3px) scale(1.02);
+    background: #0a3d6b;
+    box-shadow: 0 8px 25px rgba(6, 47, 86, 0.35);
+}
+
+.btn-first-time:active {
+    transform: translateY(-1px);
+}
+
+
+footer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1.5rem;
+	padding: 1.2rem 1.4rem;
+	background-color: #eeffee;
+	border-top: 2px solid black;
+	border-radius: 5px 5px 0 0;
+	z-index: 100;
+	margin-top: auto;
+}
+
+.footer-top {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 100%;
+}
+
+footer .nav-menu {
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+	gap: 0.8rem;
+}
+
+@media (max-width: 800px) {
+	.site-header {
+		flex-direction: column;
+		gap: 0.8rem;
+		padding: 0.8rem 1rem;
+		align-items: center;
+		text-align: center;
+	}
+
+	.logo-button img {
+		width: 250px;
+		height: 60px;
+	}
+
+	.top-nav {
+		width: 100%;
+	}
+
+	.nav-menu {
+		justify-content: center;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		width: 100%;
+	}
+
+	.nav-link {
+		padding: 0.35rem 0.6rem;
+		font-size: 0.85rem;
+	}
+
+	.footer-top {
+		flex-direction: column;
+		gap: 1.5rem;
+	}
+	
+	footer .nav-menu {
+		justify-content: center;
+	}
+}
+
+footer p {
+	margin: 0;
+	font-size: 0.9rem;
+	color: var(--black);
+	text-align: center;
+	font-weight: 500;
+	width: 100%;
+	border-top: 1px solid #ccc;
+	padding-top: 1rem;
 }

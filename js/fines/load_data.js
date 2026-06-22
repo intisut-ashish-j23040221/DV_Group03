@@ -1,22 +1,62 @@
-//Load exercise 6 data and call the functions
-d3.csv("data/fines.csv", d => ({
-    year: +d.YEAR,
-    jurisdiction: d.JURISDICTION,
-    location: d.LOCATION,
-    ageGroup: d.AGE_GROUP,
-    metric: d.METRIC,
-    detectionMethod: d.DETECTION_METHOD,
-    fines: +d.FINES,
-    arrests: +d.ARRESTS,
-    charges: +d.CHARGES,
-    month: +d.MONTH
-})).then(data => {
+const normalizeJurisdiction = (name) => {
+    const map = {
+        'New South Wales': 'NSW',
+        'Northern Territory': 'NT',
+        'South Australia': 'SA',
+        'Western Australia': 'WA',
+        'Australian Capital Territory': 'ACT',
+        'Tasmania': 'TAS',
+        'Queensland': 'QLD',
+        'Victoria': 'VIC'
+    };
+    return map[name.trim()] || name;
+};
+
+// Load both datasets and merge
+Promise.all([
+    d3.csv("data/fines.csv", d => ({
+        year: +d.YEAR,
+        jurisdiction: d.JURISDICTION,
+        location: d.LOCATION,
+        ageGroup: d.AGE_GROUP,
+        metric: d.METRIC,
+        detectionMethod: d.DETECTION_METHOD,
+        fines: +d.FINES,
+        arrests: +d.ARRESTS,
+        charges: +d.CHARGES,
+        month: +d.MONTH
+    })),
+    d3.csv("data/license_data.csv", d => ({
+        year: +d.Year,
+        jurisdiction: normalizeJurisdiction(d.Jurisdiction),
+        totalLicenses: +d.Total_License_Number
+    }))
+]).then(([finesData, licenseData]) => {
+    const licenseMap = {};
+    licenseData.forEach(d => {
+        licenseMap[`${d.year}-${d.jurisdiction}`] = d.totalLicenses;
+    });
+
+    // Merge total licenses into each fine record
+    const data = finesData.map(d => {
+        const key = `${d.year}-${d.jurisdiction}`;
+        const totalLicenses = licenseMap[key] || 0;
+        return {
+            ...d,
+            totalLicenses
+        };
+    });
+
     console.log(data);
+    let currentFilters = { year: 'All', jurisdiction: 'All', metric: 'All' };
     const renderCharts = filters => {
+        currentFilters = filters;
         const selectedMetric = filters.metric || 'All';
 
         const filtered = data.filter(d => {
-            return (filters.year === 'All' || +filters.year === d.year)
+            const matchesYear = (filters.year === 'All' || filters.year === 'all') || 
+                               (Array.isArray(filters.year) && (filters.year.includes(d.year) || filters.year.includes(String(d.year))));
+            return matchesYear
                 && (filters.jurisdiction === 'All' || filters.jurisdiction === d.jurisdiction)
                 && (selectedMetric === 'All' || selectedMetric === d.metric);
         });
@@ -27,9 +67,9 @@ d3.csv("data/fines.csv", d => ({
         });
 
         if (typeof drawKPIs === 'function') drawKPIs(filtered, comparisonData, selectedMetric);
-        drawJurisdictionSpeedingBar(filtered, selectedMetric);
-        drawCameraSpeedingBar(filtered, selectedMetric);
-        drawFinesLineChart(filtered, selectedMetric);
+        drawJurisdictionSpeedingMap(filtered, selectedMetric);
+        drawCameraSpeedingRadar(filtered, selectedMetric);
+        drawFinesStreamgraph(filtered, selectedMetric);
         drawLocationStackedBar(filtered, selectedMetric);
         drawLocationHeatmap(filtered, selectedMetric);
     };
@@ -44,13 +84,19 @@ d3.csv("data/fines.csv", d => ({
         });
     }
 
-    // Call functions after data is loaded
-    // drawHistogram(data);
-    // populateFilters (data);
-    // createScatterPlot(data); 
+    const debounce = (fn, delay) => {
+        let timeout;
+        return (...args) => {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => fn(...args), delay);
+        };
+    };
 
-    // createTooltip();
-    // handleMouseEvents();
+    const redrawCharts = debounce(() => {
+        renderCharts(currentFilters);
+    }, 120);
+
+    window.addEventListener('resize', redrawCharts);
     
 }).catch(error => {
     console.error("Error loading the CSV file:", error);

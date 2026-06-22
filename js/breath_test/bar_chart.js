@@ -1,10 +1,12 @@
-﻿const drawJurisdictionBreathBar = (data) => {
+const drawJurisdictionBreathBar = (data) => {
     const container = d3.select("#jurisdiction-breath-bar");
     if (container.empty()) {
         console.warn("Jurisdiction breath bar container not found");
         return;
     }
+
     container.html(""); // Clear previous
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     if (data.length === 0) return;
 
@@ -26,7 +28,7 @@
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = Math.max(currentInnerWidth, 400);
+    const w = Math.max(currentInnerWidth, 100);
 
     const svg = container
         .append("svg")
@@ -62,13 +64,13 @@
     chart.append("text")
         .attr("transform", "rotate(-90)")
         .attr("x", -innerHeight / 2)
-        .attr("y", -42)
+        .attr("y", -52)
         .attr("text-anchor", "middle")
         .style("font-size", "12px")
         .style("fill", "#333")
         .text("Jurisdiction");
 
-    chart.selectAll(".bar")
+    const bars = chart.selectAll(".bar")
         .data(totals)
         .enter()
         .append("rect")
@@ -78,9 +80,21 @@
         .attr("y", d => yScale(d.jurisdiction))
         .attr("height", yScale.bandwidth())
         .attr("width", d => xScale(d.rate))
-        .attr("fill", "#004B87");
+        .attr("fill", "#004B87")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); 
 
-    // Create tooltip AFTER bars so it appears on top
+    chart.selectAll(".label")
+        .data(totals)
+        .enter()
+        .append("text")
+        .attr("class", "label")
+        .attr("x", d => xScale(d.rate) + 5)
+        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2 + 4)
+        .text(d => d.rate.toFixed(1))
+        .style("font-size", "11px")
+        .attr("fill", "#333");
+
+    // Create tooltip AFTER labels so it appears on top
     const tooltip = chart
         .append("g")
         .attr("class", "tooltip")
@@ -96,7 +110,6 @@
         .attr("rx", 4)
         .attr("ry", 4)
         .attr("fill", "#EBA746")
-        .attr("fill-opacity", 0.95)
         .attr("stroke", "#ffffff")
         .attr("stroke-width", 2);
 
@@ -109,70 +122,63 @@
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
+        const barX = +rect.attr("x") + +rect.attr("width");
+        const barY = +rect.attr("y") + yScale.bandwidth() / 2;
+
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Jurisdiction: ${d.jurisdiction}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Total Breath Tests Conducted: ${d3.format(",.0f")(d.totalConducted)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Total Licenses: ${d3.format(",.0f")(d.totalLicenses)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Tests per 10,000 Licenses: ${d.rate.toFixed(1)}`);
+
+        const tooltipWidth = 300;
+        const tooltipHeight = 110;
+        const spaceRight = w - barX;
+
+        let tooltipX, tooltipY;
+        if (spaceRight > tooltipWidth + 20) {
+            tooltipX = barX + 10;
+        } else {
+            tooltipX = barX - tooltipWidth - 10;
+        }
+        tooltipY = barY - tooltipHeight / 2;
+
+        tooltipX = Math.max(25, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(25, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+
+        tooltip
+            .style("opacity", 1)
+            .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
+            .style("z-index", 9999);
+    }
+
     // Add hover events to bars
     chart.selectAll(".bar")
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
-            const barX = +rect.attr("x") + +rect.attr("width");
-            const barY = +rect.attr("y") + yScale.bandwidth() / 2;
-
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Jurisdiction: ${d.jurisdiction}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Total Breath Tests Conducted: ${d3.format(",.0f")(d.totalConducted)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Total Licenses: ${d3.format(",.0f")(d.totalLicenses)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Tests per 10,000 Licenses: ${d.rate.toFixed(1)}`);
-
-            const tooltipWidth = 300;
-            const tooltipHeight = 110;
-            const spaceRight = w - barX;
-
-            let tooltipX, tooltipY;
-            if (spaceRight > tooltipWidth + 20) {
-                tooltipX = barX + 10;
-            } else {
-                tooltipX = barX - tooltipWidth - 10;
-            }
-            tooltipY = barY - tooltipHeight / 2;
-
-            tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-            tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
-
-            tooltip
-                .style("opacity", 1)
-                .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
-                .style("z-index", 9999);
-        })
-        .on("mouseleave", () => {
-            tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        }); 
-
-    chart.selectAll(".label")
-        .data(totals)
-        .enter()
-        .append("text")
-        .attr("class", "label")
-        .attr("x", d => xScale(d.rate) + 5)
-        .attr("y", d => yScale(d.jurisdiction) + yScale.bandwidth() / 2 + 4)
-        .text(d => d.rate.toFixed(1))
-        .style("font-size", "11px")
-        .attr("fill", "#333");
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("keydown", (e) => createDataPointMovement(e, bars))
+        .on("click", (e) => syncClicksBetweenDPs(e, bars));
 
     // Attach right-click context menu
     addDataTableContextMenu(container.node(),
@@ -190,9 +196,12 @@
                 d3.select(clone).selectAll('.bar').attr('opacity', 1);
                 return;
             }
+            const activeJurs = Array.isArray(row)
+                ? row.map(r => r.Jurisdiction)
+                : [row.Jurisdiction];
             d3.select(clone).selectAll('.bar')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-jurisdiction') === row.Jurisdiction ? 1 : 0.2;
+                    return activeJurs.includes(d3.select(this).attr('data-jurisdiction')) ? 1 : 0.2;
                 });
         }
     );

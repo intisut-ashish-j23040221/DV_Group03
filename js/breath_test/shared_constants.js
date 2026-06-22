@@ -5,7 +5,6 @@ const height = 380;
 const innerWidth = width - margin.left - margin.right;
 const innerHeight = height - margin.top - margin.bottom;
 
-// set up the scales (reusable by helper functions)
 let xScale = d3.scaleLinear();
 let yScale = d3.scaleLinear();
 

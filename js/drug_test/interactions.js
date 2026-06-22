@@ -1,4 +1,4 @@
-// Show a right-click modal that includes the visualization and a data table
+// Modal info when user right clicks
 const showChartDataTable = (event, chartContainer, data, columns, title, explanation, onRowClick) => {
     event.preventDefault();
 
@@ -25,50 +25,53 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     content.style.cssText = `
         background: white;
         border-radius: 12px;
-        width: 100%;
-        max-width: 1100px;
-        max-height: 90vh;
+        width: 95%;
+        max-width: 1300px;
+        height: 95vh;
         overflow: hidden;
         display: flex;
+        flex-direction: column;
         box-shadow: 0 16px 40px rgba(0,0,0,0.18);
     `;
     
     // Prevent clicks inside content from closing modal
     content.addEventListener('click', (e) => {
-        e.stopPropagation();
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
 
     const leftPane = document.createElement('div');
     leftPane.style.cssText = `
-        width: 56%;
-        min-width: 360px;
-        padding: 10px 24px;
-        border-right: 1px solid #ebedf0;
+        height: 60%;
+        width: 100%;
+        padding: 20px 24px;
+        border-bottom: 1px solid #ebedf0;
         overflow: auto;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        background: #fafafa;
     `;
 
     const rightPane = document.createElement('div');
     rightPane.style.cssText = `
-        width: 44%;
-        min-width: 280px;
-        padding: 20px;
+        flex: 1;
+        width: 100%;
+        padding: 24px;
         overflow: auto;
     `;
 
     const clone = chartContainer.cloneNode(true);
-    // Make the cloned chart fill available modal vertical space (height expanded)
-    clone.style.cssText = 'width: 100%; height: 100%; display: block;';
-    // Remove any existing tooltips from the clone
+
+    clone.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;';
     clone.querySelectorAll('.tooltip').forEach(el => el.remove());
-    // Disable tooltip interactions in the cloned chart
-    clone.querySelectorAll('rect, circle').forEach(el => {
+    clone.querySelectorAll('rect, circle, path').forEach(el => {
         el.style.pointerEvents = 'none';
     });
-    // Ensure the SVG inside the clone stretches to fill the wrapper
+
+    clone.querySelectorAll("g text.text-value-label").forEach(t => t.remove() );
     clone.querySelectorAll('svg').forEach(sv => {
         try {
             sv.setAttribute('width', '100%');
@@ -77,11 +80,26 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
             sv.style.display = 'block';
             sv.style.width = '100%';
             sv.style.height = '100%';
+            sv.style.aspectRatio = 'auto';
+
+            // Enhance text clarity in the modal
+            sv.querySelectorAll('text').forEach(t => {
+                t.style.fontWeight = '500';
+                const currentFontSize = window.getComputedStyle(t).fontSize;
+                const fs = parseFloat(currentFontSize);
+                if (fs && fs < 14) {
+                    t.style.fontSize = '14px';
+                }
+                // Ensure labels are dark enough
+                if (t.style.fill === 'rgb(51, 51, 51)' || t.getAttribute('fill') === '#333') {
+                    t.style.fill = '#111';
+                }
+            });
         } catch (e) {}
     });
 
     const chartCloneWrapper = document.createElement('div');
-    chartCloneWrapper.style.cssText = 'width: 100%; height: calc(86vh - 80px); display: flex; align-items: center; justify-content: center; background: #fafafa; border-radius: 8px; padding: 16px 20px;';
+    chartCloneWrapper.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;';
     chartCloneWrapper.appendChild(clone);
     leftPane.appendChild(chartCloneWrapper);
 
@@ -126,7 +144,7 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
         columns.forEach(col => {
             const td = document.createElement('td');
             const value = row[col];
-            td.textContent = typeof value === 'number' ? value.toLocaleString() : value;
+            td.textContent = (typeof value === 'number' && col?.toLowerCase() !== "year") ? value.toLocaleString() : value;
             td.style.cssText = 'padding: 10px; color: #374151;';
             tr.appendChild(td);
         });
@@ -207,11 +225,54 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     document.addEventListener('keydown', escHandler);
 };
 
+const triggerMenu = (e, dataFn, columnsFn, container, title, explanation, onRowClick) => {
+    const data = dataFn();
+    const columns = columnsFn();
+    showChartDataTable(e, container, data, columns, title, explanation, onRowClick)
+}
+
 const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanation, onRowClick) => {
     if (!container) return;
-    container.addEventListener('contextmenu', (e) => {
-        const data = dataFn();
-        const columns = columnsFn();
-        showChartDataTable(e, container, data, columns, title, explanation, onRowClick);
-    });
+    
+    // Remove existing handlers to prevent duplicate event accumulation on redrawing
+    if (container._contextMenuHandler) {
+        container.removeEventListener('contextmenu', container._contextMenuHandler);
+    }
+
+    let params = [dataFn, columnsFn, container, title, explanation, onRowClick];
+    
+    container._contextMenuHandler = (e) => triggerMenu(e, ...params);
+    container._enterKeyHandler = (e) => e.key === "Enter" ? triggerMenu(e, ...params) : null;
+
+    container.addEventListener('contextmenu', container._contextMenuHandler);
+    container.addEventListener("keydown", container._enterKeyHandler);
 };
+
+
+const syncClicksBetweenDPs = (e, dp) => {
+    dp.attr("tabindex", "-1");
+    d3.select(e.currentTarget).attr("tabindex", "0");
+}
+
+const createDataPointMovement = (event, dp) => {
+  const targetElement = event.currentTarget;
+  const barsArray = dp.nodes();
+  const currentIndex = barsArray.indexOf(targetElement);
+  let nextIndex = currentIndex;
+
+  // 1. NAVIGATION: Arrow Keys
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    nextIndex = (currentIndex + 1) % barsArray.length;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
+  }
+  
+  if (nextIndex !== currentIndex) {  
+    dp.attr("tabindex", "-1");
+    d3.select(barsArray[nextIndex]).attr("tabindex", "0");
+    barsArray[nextIndex].focus();
+    return; 
+  }
+}

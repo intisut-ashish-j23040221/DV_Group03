@@ -1,6 +1,7 @@
-const drawDrugTrendLine = (data) => {
+const drawDrugTrendStackedBar = (data, isInt = false) => {
     const container = d3.select("#drug-trend-line");
     container.html("");
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     if (data.length === 0) return;
 
@@ -21,7 +22,7 @@ const drawDrugTrendLine = (data) => {
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
     const currentInnerWidth = containerWidth - margin.left - margin.right;
-    const w = Math.max(currentInnerWidth, 400);
+    const w = isInt ? height : Math.max(currentInnerWidth, 100);
 
     const svg = container
         .append("svg")
@@ -43,9 +44,18 @@ const drawDrugTrendLine = (data) => {
     const xScale = createBandScale(chartData.map(d => d.year), w, 0.2);
     const yScale = createLinearScaleY([0, d3.max(chartData, d => d.conducted)], innerHeight);
 
+    const yAxisGroup = chart.append("g");
+    const updateYAxis = (maxValue) => {
+        yScale.domain([0, maxValue]);
+        yAxisGroup
+            .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")))
+            .selectAll("text")
+            .style("font-size", "12px");
+    };
+
     const stackedSegments = layers.flatMap(layer => layer.map(segment => ({ ...segment, key: layer.key })));
 
-    chart.append("g")
+    const bars = chart.append("g")
         .selectAll("g")
         .data(layers)
         .join("g")
@@ -59,9 +69,10 @@ const drawDrugTrendLine = (data) => {
         .attr("width", xScale.bandwidth())
         .attr("data-year", d => d.data.year)
         .attr("data-key", d => d.key)
-        .attr("fill", d => colorScale(d.key));
+        .attr("fill", d => colorScale(d.key))
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); // keyboard accessible;
 
-    chart.append("g")
+    const labels = chart.append("g")
         .selectAll("text")
         .data(stackedSegments)
         .join("text")
@@ -72,17 +83,37 @@ const drawDrugTrendLine = (data) => {
         .style("font-size", "11px")
         .style("fill", "white")
         .style("pointer-events", "none")
+        .attr("class", "text-value-label")
         .text(d => {
             const value = d[1] - d[0];
             return value > 0 ? d3.format(".2s")(value) : "";
-        })
-        .filter(function(d) {
-            const pixelHeight = yScale(d[0]) - yScale(d[1]);
-            const value = d[1] - d[0];
-            // Only show labels when the segment is tall enough in pixels
-            // and has a non-zero value. Threshold tuned to avoid overlap.
-            return pixelHeight > 18 && value > 0;
         });
+
+    const updateChartVisibility = (key) => {
+        const maxValue = key ? d3.max(chartData, d => d[key]) : d3.max(chartData, d => d.conducted);
+        updateYAxis(maxValue);
+
+        bars
+            .attr('y', d => {
+                if (!key || d.key === key) return yScale(d[1]);
+                return yScale(0);
+            })
+            .attr('height', d => {
+                if (!key || d.key === key) return yScale(d[0]) - yScale(d[1]);
+                return 0;
+            })
+            .attr('opacity', d => !key || d.key === key ? 1 : 0);
+
+        labels
+            .attr('y', d => {
+                if (!key || d.key === key) return yScale(d[0]) - (yScale(d[0]) - yScale(d[1])) / 2;
+                return yScale(0);
+            })
+            .attr('opacity', d => {
+                if (!key || d.key === key) return ((yScale(d[0]) - yScale(d[1])) > 18 ? 1 : 0);
+                return 0;
+            });
+    };
 
     chart.append("g")
         .attr("transform", `translate(0,${innerHeight})`)
@@ -98,10 +129,7 @@ const drawDrugTrendLine = (data) => {
         .style("fill", "#333")
         .text("Year");
 
-    chart.append("g")
-        .call(d3.axisLeft(yScale).ticks(6).tickFormat(d3.format(".2s")))
-        .selectAll("text")
-        .style("font-size", "12px");
+    updateYAxis(d3.max(chartData, d => d.conducted));
 
     chart.append("text")
         .attr("transform", "rotate(-90)")
@@ -112,7 +140,7 @@ const drawDrugTrendLine = (data) => {
         .style("fill", "#333")
         .text("Total Drug Tests Conducted");
 
-    // Legend for stacked segments (horizontal under x-axis)
+    // Legend
     const legend = chart.append("g")
         .attr("transform", `translate(${w / 2 - 100}, ${innerHeight + 40})`);
 
@@ -121,10 +149,34 @@ const drawDrugTrendLine = (data) => {
         { key: 'negative', label: 'Non-positive' }
     ];
 
+    let activeLegendKey = null;
+
+    const updateLegendHighlight = (key) => {
+        chart.selectAll('rect')
+            .filter(function() { return d3.select(this).attr('data-key'); })
+            .attr('opacity', d => {
+                if (!key) return 1;
+                return d.key === key ? 1 : 0.2;
+            });
+
+        legendRows.selectAll('rect')
+            .attr('stroke', d => d.key === key ? '#000' : 'none')
+            .attr('stroke-width', d => d.key === key ? 2 : 0);
+
+        legendRows.selectAll('text')
+            .style('font-weight', d => d.key === key ? '700' : '400');
+    };
+
     const legendRows = legend.selectAll('g')
         .data(legendItems)
         .join('g')
-        .attr('transform', (_, i) => `translate(${i * 140}, 0)`);
+        .attr('transform', (_, i) => `translate(${i * 140}, 0)`)
+        .style('cursor', 'pointer')
+        .on('click', (event, d) => {
+            activeLegendKey = activeLegendKey === d.key ? null : d.key;
+            updateLegendHighlight(activeLegendKey);
+            updateChartVisibility(activeLegendKey);
+        });
 
     legendRows.append('rect')
         .attr('width', 14)
@@ -138,6 +190,9 @@ const drawDrugTrendLine = (data) => {
         .style('font-size', '12px')
         .attr('alignment-baseline', 'middle')
         .text(d => d.label);
+
+    updateLegendHighlight(activeLegendKey);
+    updateChartVisibility(activeLegendKey);
 
     const tooltip = chart
         .append("g")
@@ -165,62 +220,68 @@ const drawDrugTrendLine = (data) => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    chart.selectAll("rect")
+
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
+        const barX = +rect.attr("x") + xScale.bandwidth() / 2;
+        const barY = +rect.attr("y");
+        const row = d.data;
+
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Year: ${row.year}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Segment: ${d.key === 'positive' ? 'Positive' : 'Non-positive'}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Total tests: ${d3.format(",.0f")(row.conducted)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive cases: ${d3.format(",.0f")(row.positive)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive rate (%): ${row.percent.toFixed(2)}%`);
+
+        const tooltipWidth = 300;
+        const tooltipHeight = 120;
+        const spaceAbove = barY;
+
+        let tooltipX = barX - tooltipWidth / 2;
+        let tooltipY = spaceAbove > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
+
+        tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+
+        tooltip
+            .style("opacity", 1)
+            .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
+            .style("z-index", 9999);
+    }
+
+
+    let chartType = chart.selectAll("rect")
         .filter(function() { return d3.select(this).attr("data-key"); })
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
-            const barX = +rect.attr("x") + xScale.bandwidth() / 2;
-            const barY = +rect.attr("y");
-            const row = d.data;
-
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Year: ${row.year}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Segment: ${d.key === 'positive' ? 'Positive' : 'Non-positive'}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Total tests: ${d3.format(",.0f")(row.conducted)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive cases: ${d3.format(",.0f")(row.positive)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive rate (%): ${row.percent.toFixed(2)}%`);
-
-            const tooltipWidth = 300;
-            const tooltipHeight = 120;
-            const spaceAbove = barY;
-
-            let tooltipX = barX - tooltipWidth / 2;
-            let tooltipY = spaceAbove > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
-
-            tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-            tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
-
-            tooltip
-                .style("opacity", 1)
-                .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
-                .style("z-index", 9999);
-        })
-        .on("mouseleave", () => {
-            tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        });
-
-    // (Removed) summary-percent text display — not needed in this chart layout
+    
+    chartType
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("keydown", (e) => createDataPointMovement(e, chartType))
+        .on("click", (e) => syncClicksBetweenDPs(e, chartType));
 
     addDataTableContextMenu(container.node(),
         () => chartData.map(d => ({
@@ -238,9 +299,12 @@ const drawDrugTrendLine = (data) => {
                 d3.select(clone).selectAll('rect').attr('opacity', 1);
                 return;
             }
+            const activeYears = Array.isArray(row)
+                ? row.map(r => String(r.Year))
+                : [String(row.Year)];
             d3.select(clone).selectAll('rect')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-year') === String(row.Year) ? 1 : 0.2;
+                    return activeYears.includes(d3.select(this).attr('data-year')) ? 1 : 0.2;
                 });
         }
     );
