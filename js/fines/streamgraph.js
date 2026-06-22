@@ -49,7 +49,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
 
     const yScale = d3.scaleLinear()
         .domain([
-            0
+            0,
             d3.max(layers, l => d3.max(l, d => d[1]))
         ])
         .range([innerHeight, 0])
