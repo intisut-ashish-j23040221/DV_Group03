@@ -68,7 +68,7 @@ const drawJurisdictionDrugBar = (data) => {
         .style("fill", "#333")
         .text("Jurisdiction");
 
-    chart.selectAll(".bar")
+    let bars = chart.selectAll(".bar")
         .data(totals)
         .enter()
         .append("rect")
@@ -119,59 +119,63 @@ const drawJurisdictionDrugBar = (data) => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
+        const barX = +rect.attr("x") + +rect.attr("width");
+        const barY = +rect.attr("y") + yScale.bandwidth() / 2;
+
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Jurisdiction: ${d.jurisdiction}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Per 10K: ${d.rate.toFixed(1)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Conducted: ${d3.format(",.0f")(d.totalConducted)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Licenses: ${d3.format(",.0f")(d.totalLicenses)}`);
+
+        const tooltipWidth = 300;
+        const tooltipHeight = 110;
+        const spaceRight = w - barX;
+
+        let tooltipX, tooltipY;
+        if (spaceRight > tooltipWidth + 20) {
+            tooltipX = barX + 10;
+        } else {
+            tooltipX = barX - tooltipWidth - 10;
+        }
+        tooltipY = barY - tooltipHeight / 2;
+
+        tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+
+        tooltip
+            .style("opacity", 1)
+            .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
+            .style("z-index", 9999);
+    }
+
     // Add hover events to bars
     chart.selectAll(".bar")
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
-            const barX = +rect.attr("x") + +rect.attr("width");
-            const barY = +rect.attr("y") + yScale.bandwidth() / 2;
-
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Jurisdiction: ${d.jurisdiction}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Per 10K: ${d.rate.toFixed(1)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Conducted: ${d3.format(",.0f")(d.totalConducted)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Licenses: ${d3.format(",.0f")(d.totalLicenses)}`);
-
-            const tooltipWidth = 300;
-            const tooltipHeight = 110;
-            const spaceRight = w - barX;
-
-            let tooltipX, tooltipY;
-            if (spaceRight > tooltipWidth + 20) {
-                tooltipX = barX + 10;
-            } else {
-                tooltipX = barX - tooltipWidth - 10;
-            }
-            tooltipY = barY - tooltipHeight / 2;
-
-            tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-            tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
-
-            tooltip
-                .style("opacity", 1)
-                .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
-                .style("z-index", 9999);
-        })
-        .on("mouseleave", () => {
-            tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        });
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("keydown", (e) => createDataPointMovement(e, bars))
+        .on("click", (e) => syncClicksBetweenDPs(e, bars));
 
     // Attach right-click context menu
     addDataTableContextMenu(container.node(),

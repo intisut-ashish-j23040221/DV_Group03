@@ -243,3 +243,36 @@ const addDataTableContextMenu = (container, dataFn, columnsFn, title, explanatio
     
     container.addEventListener('contextmenu', container._contextMenuHandler);
 };
+
+
+const syncClicksBetweenDPs = (e, dp) => {
+    dp.attr("tabindex", "-1");
+    d3.select(e.currentTarget).attr("tabindex", "0");
+}
+
+const createDataPointMovement = (event, dp) => {
+  const targetElement = event.currentTarget;
+  const barsArray = dp.nodes();
+  const currentIndex = barsArray.indexOf(targetElement);
+  let nextIndex = currentIndex;
+
+  // 1. NAVIGATION: Arrow Keys
+  if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+    event.preventDefault();
+    nextIndex = (currentIndex + 1) % barsArray.length;
+  } else if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+    event.preventDefault();
+    nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
+  }
+  
+  // If the index changed, rove the tabindex and shift focus
+  if (nextIndex !== currentIndex) {
+    // Set all dp to -1
+    dp.attr("tabindex", "-1");
+    // Set the newly targeted bar to 0
+    d3.select(barsArray[nextIndex]).attr("tabindex", "0");
+    // Focus the new bar
+    barsArray[nextIndex].focus();
+    return; // Exit early
+  }
+}
