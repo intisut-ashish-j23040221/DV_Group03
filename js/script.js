@@ -106,8 +106,9 @@
 							if (!popoverContainer) return;
 
 							// 2. Make the popover container focusable and shift focus to it
-							popoverContainer.setAttribute('tabindex', '-1');
-							popoverContainer.focus();
+							const nextbtn = document.querySelector(".driver-popover-next-btn")
+							nextbtn.setAttribute('tabindex', '-1');
+							nextbtn.focus();
 
 							// // 3. Set up the focus trap for this step
 							// setupPopoverFocusTrap(popoverContainer);
