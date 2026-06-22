@@ -52,6 +52,37 @@
 		}
 	}
 
+	function setupPopoverFocusTrap(popover) {
+		// Find all interactive elements inside the driver.js popover card
+		const focusableSelectors = 'a, button, input, [tabindex="0"]';
+		
+		// Remove any old keydown listeners to prevent duplicates on step changes
+		popover.onkeydown = null; 
+
+		popover.onkeydown = function(e) {
+			if (e.key !== 'Tab') return;
+
+			const focusableElements = Array.from(popover.querySelectorAll(focusableSelectors));
+			if (focusableElements.length === 0) return;
+
+			const firstElement = focusableElements[0];
+			const lastElement = focusableElements[focusableElements.length - 1];
+
+			// Shift + Tab (Navigating backwards)
+			if (e.shiftKey) {
+				if (document.activeElement === firstElement) {
+					e.preventDefault();
+					lastElement.focus(); // Loop to the last button (e.g., "Next")
+				}
+			} else { // Tab (Navigating forwards)
+				if (document.activeElement === lastElement) {
+					e.preventDefault();
+					firstElement.focus(); // Loop to the first element (e.g., Close button)
+				}
+			}
+		};
+	}
+
 	function setupOnboardingTour() {
 		const tourBtn = document.getElementById('start-tour-btn');
 		if (tourBtn && window.driver) {
@@ -67,12 +98,27 @@
 						{ element: '.nav-link[href="drug_test.html"]', popover: { title: 'Drug Tests Dashboard', description: 'Click here to explore the Drug Tests dashboard, tracking tests and positive outcomes.', side: "bottom", align: 'start' }},
 						{ element: '.nav-link[href="fines.html"]', popover: { title: 'Fines Dashboard', description: 'Click here to analyze traffic fines, historical trends, and camera detection data.', side: "bottom", align: 'start' }},
 						{ element: '.nav-menu', popover: { title: 'Dashboard Tours', description: 'Once you are on a dashboard, look for the "?" icon next to "Filter options" to take a tour of that specific page!', side: "bottom", align: 'start' }}
-					]
+					],
+					onHighlighted: (element, step, options) => {
+						setTimeout(() => {
+							// 1. Find the driver popover card container
+							const popoverContainer = document.querySelector('.driver-popover');
+							if (!popoverContainer) return;
+
+							// 2. Make the popover container focusable and shift focus to it
+							popoverContainer.setAttribute('tabindex', '-1');
+							popoverContainer.focus();
+
+							// 3. Set up the focus trap for this step
+							setupPopoverFocusTrap(popoverContainer);
+						}, 50);
+					}
 				});
 				driverObj.drive();
 			});
 		}
 	}
+
 
 	function setupBreathTour() {
 		const breathTourBtn = document.getElementById('breath-tour-btn');
