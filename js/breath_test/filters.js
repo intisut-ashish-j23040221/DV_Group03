@@ -34,11 +34,16 @@ const initFilters = (data, onChange) => {
 
     // "All Years" option
     const allLabel = document.createElement('label');
+    const allInput = document.createElement('input');
+    const allSpan = document.createElement('span');
     allLabel.className = 'dropdown-item';
-    allLabel.innerHTML = `
-      <input type="checkbox" value="All" id="year-checkbox-all" checked>
-      <span>All Years</span>
-    `;
+    allInput.type = "checkbox";
+    allInput.value = "All";
+    allInput.id = "year-checkbox-all";
+    allInput.checked = true;
+    allSpan.textContent = "All Years";
+    allLabel.appendChild(allInput);
+    allLabel.appendChild(allSpan);
     yearMenu.appendChild(allLabel);
 
     // Individual years options
@@ -51,7 +56,8 @@ const initFilters = (data, onChange) => {
       inputType.value = `${year}`;
       inputType.classList.add("year-checkbox-item");
       spanText.textContent = `${year}`;
-      yearLabel.appendChild(inputType, spanText);
+      yearLabel.appendChild(inputType);
+      yearLabel.appendChild(spanText);
       yearMenu.appendChild(yearLabel);
 
       inputType.addEventListener("keydown", e => {
