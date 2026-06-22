@@ -141,7 +141,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
     const focusLine = chart.append("line")
         .attr("y1", 0)
         .attr("y2", innerHeight)
-        .style("stroke", "#ff9800") 
+        .style("stroke", "#000") 
         .style("stroke-width", "2px")
         .style("stroke-dasharray", "4 4")
         .style("visibility", "hidden");
@@ -269,6 +269,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         // Smoothly transform your SVG tooltip container to the correct coordinate slot
         tooltip
             .style("visibility", "visible")
+            .style("opacity", 1)
             .attr("transform", `translate(${tx}, ${ty})`);
     };
 
