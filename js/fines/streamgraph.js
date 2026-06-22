@@ -205,7 +205,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
             .attr("x2", xPosition)
             .style("visibility", "visible");
 
-        const yearData = chartData.filter(d => d.year === year);
+        const yearData = years.filter(d => d.year === year);
         
         let tooltipHtml = `<strong>Year: ${year}</strong><br/>`;
         yearData.forEach(d => {
