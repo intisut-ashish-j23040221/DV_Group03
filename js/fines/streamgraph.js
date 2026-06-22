@@ -46,6 +46,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .offset(d3.stackOffsetNone);
 
     const layers = stack(stackedData);
+    layers.map(l => l.key);
 
     const yScale = d3.scaleLinear()
         .domain([
@@ -313,7 +314,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .on("focus", handleYearFocus)
         .on("mouseleave", handleYearBlur)
         .on("blur", handleYearBlur)
-        // Re-use your perfectly working movement function from before!
         .on("keydown", (event) => createDataPointMovement(event, yearTrackers))
         .on("click", (event) => syncClicksBetweenDPs(event, yearTrackers));
 
