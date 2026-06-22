@@ -140,7 +140,7 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .style("fill", "#333")
         .text("Total Drug Tests Conducted");
 
-    // Legend for stacked segments (horizontal under x-axis)
+    // Legend
     const legend = chart.append("g")
         .attr("transform", `translate(${w / 2 - 100}, ${innerHeight + 40})`);
 
@@ -282,8 +282,6 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
         .on("keydown", (e) => createDataPointMovement(e, chartType))
         .on("click", (e) => syncClicksBetweenDPs(e, chartType));
-
-    // (Removed) summary-percent text display — not needed in this chart layout
 
     addDataTableContextMenu(container.node(),
         () => chartData.map(d => ({

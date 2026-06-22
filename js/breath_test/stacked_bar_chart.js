@@ -5,7 +5,7 @@ const drawBreathTrendStackedBar = (data) => {
 
     if (data.length === 0) return;
 
-    // Aggregate by year - compute positive and non-positive counts
+    // Aggregate by year 
     const chartData = d3.rollups(
         data,
         v => {
@@ -22,7 +22,8 @@ const drawBreathTrendStackedBar = (data) => {
     if (chartData.length === 0) return;
 
     const containerWidth = container.node().getBoundingClientRect().width || width;
-    // Increase right margin to 80 to make sure the right Y axis labels fit
+    
+    // Use 80 to make sure the right Y axis labels fit
     const currentInnerWidth = containerWidth - margin.left - 80; 
     const w = Math.max(currentInnerWidth, 100);
 
@@ -61,7 +62,6 @@ const drawBreathTrendStackedBar = (data) => {
             yAxisPositiveGroup.style("opacity", 1)
                 .call(d3.axisRight(yScalePositive).ticks(6).tickFormat(d3.format(".2s")));
             
-            // Style right axis: #333 for text, Black for lines to link to data
             yAxisPositiveGroup.selectAll("text").style("fill", "#333").style("font-weight", "bold");
             yAxisPositiveGroup.selectAll("line, path").style("stroke", "#000000");
         }
@@ -174,7 +174,7 @@ const drawBreathTrendStackedBar = (data) => {
         .attr("class", "y-label-right")
         .attr("transform", "rotate(90)")
         .attr("x", innerHeight / 2)
-        .attr("y", -w - 55) // Pushed labels further out to clear axis
+        .attr("y", -w - 55) 
         .attr("text-anchor", "middle")
         .style("font-size", "13px")
         .style("font-weight", "bold")

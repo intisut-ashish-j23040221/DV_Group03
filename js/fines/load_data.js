@@ -1,4 +1,3 @@
-// Normalize jurisdiction names for merging
 const normalizeJurisdiction = (name) => {
     const map = {
         'New South Wales': 'NSW',
@@ -33,7 +32,6 @@ Promise.all([
         totalLicenses: +d.Total_License_Number
     }))
 ]).then(([finesData, licenseData]) => {
-    // Create lookup map for license data
     const licenseMap = {};
     licenseData.forEach(d => {
         licenseMap[`${d.year}-${d.jurisdiction}`] = d.totalLicenses;
@@ -99,14 +97,6 @@ Promise.all([
     }, 120);
 
     window.addEventListener('resize', redrawCharts);
-
-    // Call functions after data is loaded
-    // drawHistogram(data);
-    // populateFilters (data);
-    // createScatterPlot(data); 
-
-    // createTooltip();
-    // handleMouseEvents();
     
 }).catch(error => {
     console.error("Error loading the CSV file:", error);

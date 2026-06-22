@@ -11,14 +11,11 @@
 		navLinks.forEach((link) => {
 			link.addEventListener("click", (event) => {
 				const targetPage = link.getAttribute("data-target");
-				//It validate is the target page match with pageRoutes or Not
 				if (!targetPage || !pageRoutes[targetPage]) {
 					return;
 				}
 				event.preventDefault();  
-				//Built-in browser that no need to define and used to prevent the default action.
-				//It means the browser not directly navigate according to the href attribute, it strictly follow the JavaScript file.
-				window.location.href = pageRoutes[targetPage];
+				window.location.href = pageRoutes[targetPage]; // will redirect the user to the correct page
 			});
 		});
 
@@ -35,53 +32,22 @@
 	}
 
 	function setActiveNavigation() {
-		//At the HTML files, we specify a variable named data-page that help the JavaScript to know any of them is the current page.
 		const currentPage = document.body.getAttribute("data-page");  
 		const navLinks = document.querySelectorAll(".nav-link");
 
 		navLinks.forEach((link) => {
 			const isCurrent = link.getAttribute("data-target") === currentPage;
-			link.classList.toggle("is-active", isCurrent); // Add class is-active to enable the CSS style (Highlight current page in the navigation bar)
+			link.classList.toggle("is-active", isCurrent); // needed for css
 		});
 	}
 
 	function setFooterYear() {
 		const yearNode = document.getElementById("current-year");
 		if (yearNode) {
-			yearNode.textContent = String(new Date().getFullYear()); //Get a timestamp, Retrieve the Current Year from timestamp, Convert to String)
+			yearNode.textContent = String(new Date().getFullYear()); 
 		}
 	}
 
-	function setupPopoverFocusTrap(popover) {
-		// Find all interactive elements inside the driver.js popover card
-		const focusableSelectors = 'a, button, input, [tabindex="0"]';
-		
-		// Remove any old keydown listeners to prevent duplicates on step changes
-		popover.onkeydown = null; 
-
-		popover.onkeydown = function(e) {
-			if (e.key !== 'Tab') return;
-
-			const focusableElements = Array.from(popover.querySelectorAll(focusableSelectors));
-			if (focusableElements.length === 0) return;
-
-			const firstElement = focusableElements[0];
-			const lastElement = focusableElements[focusableElements.length - 1];
-
-			// Shift + Tab (Navigating backwards)
-			if (e.shiftKey) {
-				if (document.activeElement === firstElement) {
-					e.preventDefault();
-					lastElement.focus(); // Loop to the last button (e.g., "Next")
-				}
-			} else { // Tab (Navigating forwards)
-				if (document.activeElement === lastElement) {
-					e.preventDefault();
-					firstElement.focus(); // Loop to the first element (e.g., Close button)
-				}
-			}
-		};
-	}
 
 	function setupOnboardingTour() {
 		const tourBtn = document.getElementById('start-tour-btn');
@@ -101,17 +67,12 @@
 					],
 					onHighlighted: (element, step, options) => {
 						setTimeout(() => {
-							// 1. Find the driver popover card container
 							const popoverContainer = document.querySelector('.driver-popover');
 							if (!popoverContainer) return;
 
-							// 2. Make the popover container focusable and shift focus to it
 							const nextbtn = document.querySelector(".driver-popover-next-btn")
 							nextbtn.setAttribute('tabindex', '-1');
 							nextbtn.focus();
-
-							// // 3. Set up the focus trap for this step
-							// setupPopoverFocusTrap(popoverContainer);
 						}, 50);
 					}
 				});

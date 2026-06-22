@@ -70,7 +70,6 @@ Promise.all([
                 && (filters.jurisdiction === 'All' || filters.jurisdiction === 'all' || filters.jurisdiction === d.jurisdiction);
         });
 
-        // Create benchmark historical data (ignores year selection)
         const comparisonData = data.filter(d => {
             return (filters.jurisdiction === 'All' || filters.jurisdiction === 'all' || filters.jurisdiction === d.jurisdiction);
         });

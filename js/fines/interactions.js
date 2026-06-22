@@ -270,14 +270,10 @@ const createDataPointMovement = (event, dp) => {
     nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
   }
   
-  // If the index changed, rove the tabindex and shift focus
   if (nextIndex !== currentIndex) {
-    // Set all dp to -1
     dp.attr("tabindex", "-1");
-    // Set the newly targeted bar to 0
     d3.select(barsArray[nextIndex]).attr("tabindex", "0");
-    // Focus the new bar
     barsArray[nextIndex].focus();
-    return; // Exit early
+    return; 
   }
 }

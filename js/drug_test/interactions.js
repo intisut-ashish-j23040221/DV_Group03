@@ -1,4 +1,4 @@
-// Show a right-click modal that includes the visualization and a data table
+// Modal info when user right clicks
 const showChartDataTable = (event, chartContainer, data, columns, title, explanation, onRowClick) => {
     event.preventDefault();
 
@@ -64,16 +64,14 @@ const showChartDataTable = (event, chartContainer, data, columns, title, explana
     `;
 
     const clone = chartContainer.cloneNode(true);
-    // Make the cloned chart fill available modal vertical space
+
     clone.style.cssText = 'width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;';
-    // Remove any existing tooltips from the clone
     clone.querySelectorAll('.tooltip').forEach(el => el.remove());
-    // Disable tooltip interactions in the cloned chart
     clone.querySelectorAll('rect, circle, path').forEach(el => {
         el.style.pointerEvents = 'none';
     });
+
     clone.querySelectorAll("g text.text-value-label").forEach(t => t.remove() );
-    // Ensure the SVG inside the clone stretches to fill the wrapper proportionally
     clone.querySelectorAll('svg').forEach(sv => {
         try {
             sv.setAttribute('width', '100%');
@@ -271,14 +269,10 @@ const createDataPointMovement = (event, dp) => {
     nextIndex = (currentIndex - 1 + barsArray.length) % barsArray.length;
   }
   
-  // If the index changed, rove the tabindex and shift focus
-  if (nextIndex !== currentIndex) {
-    // Set all dp to -1
+  if (nextIndex !== currentIndex) {  
     dp.attr("tabindex", "-1");
-    // Set the newly targeted bar to 0
     d3.select(barsArray[nextIndex]).attr("tabindex", "0");
-    // Focus the new bar
     barsArray[nextIndex].focus();
-    return; // Exit early
+    return; 
   }
 }

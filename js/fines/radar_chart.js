@@ -13,7 +13,6 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
     // Sum of all fines in the active dataset
     const totalFinesAll = d3.sum(data, d => d.fines || 0);
 
-    // Group by detectionMethod across all enforcement data and calculate percentage shares
     const totals = d3.rollups(
         data,
         values => d3.sum(values, d => d.fines || 0),
@@ -42,7 +41,7 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
     // 1. Radar Geometry Configuration
     const cx = w / 2;
     const cy = h / 2 + 10;
-    const r = Math.min(w, h) / 2 - 50; // Radius leaving margins for labels
+    const r = Math.min(w, h) / 2 - 50; 
     const angleSlice = (Math.PI * 2) / totals.length;
 
     // Use a Square Root scale on percentages to handle the outlier (large values) without clustering
@@ -69,10 +68,9 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
         gridGroup.append("polygon")
             .attr("points", gridPoints)
             .attr("fill", "none")
-            .attr("stroke", "#f3f4f6") // Muted grid color
+            .attr("stroke", "#f3f4f6")
             .attr("stroke-width", "1px");
 
-        // Scale numerical labels shifted further right (cx + 12) with a white legibility halo
         gridGroup.append("text")
             .attr("x", cx + 12)
             .attr("y", cy - rScale(levelVal) + 3)
@@ -92,7 +90,6 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
         const xOuter = cx + r * Math.sin(angle);
         const yOuter = cy - r * Math.cos(angle);
 
-        // Draw axis line from center to edge
         axisGroup.append("line")
             .attr("x1", cx)
             .attr("y1", cy)
@@ -101,7 +98,6 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
             .attr("stroke", "#d1d5db")
             .attr("stroke-width", "1px");
 
-        // Smart text anchors and dy offsets to prevent overlap
         let textAnchor = "middle";
         let dy = "0.35em";
         const labelX = cx + (r + 15) * Math.sin(angle);
@@ -149,7 +145,7 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
     const dots = nodesGroup.selectAll("circle")
         .data(totals)
         .join("circle")
-        .attr("class", "bar") // matches existing interactions
+        .attr("class", "bar")
         .attr("data-method", d => d.detectionMethod)
         .attr("tabindex", (d, i) => i === 0 ? "0" : "-1")
         .attr("cx", (d, i) => cx + rScale(d.percentage) * Math.sin(i * angleSlice))
@@ -160,7 +156,6 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
         .attr("stroke-width", "2px")
         .style("cursor", "pointer");
 
-    // Header title text
     chart
         .append("text")
         .attr("x", 15)
@@ -169,7 +164,6 @@ const drawCameraSpeedingRadar = (data, metric = 'All') => {
         .style("font-weight", "600")
         .text(`Fines Captured by Detection Method (%) (${metricLabel})`);
 
-    // Rich Tooltip
     const tooltip = chart
         .append("g")
         .attr("class", "tooltip")

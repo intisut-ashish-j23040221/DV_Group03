@@ -136,7 +136,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .attr("y", 0)
         .attr("width", yearWidth)
         .attr("height", innerHeight)
-        .style("fill", "transparent") // Invisible to the eye!
+        .style("fill", "transparent") 
         .style("cursor", "pointer")
         .attr("tabindex", (d, i) => i === 0 ? "0" : "-1")
 
@@ -149,7 +149,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("visibility", "hidden");
 
 
-    // Labels
     chart.append("text")
         .attr("x", w / 2)
         .attr("y", innerHeight + 35)
@@ -172,7 +171,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("font-weight", "600")
         .text(`Fines Trend by Metric Over Time (${metricLabel})`);
 
-    // Tooltip creation at the very end to guarantee correct layering
     const tooltip = chart.append("g")
         .attr("class", "tooltip")
         .style("opacity", 0)
@@ -215,25 +213,15 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
     }
 
     const handleYearFocus = (e, year) => {
-        // 1. Highlight the current stream layers based on selection
-        // Note: If you're tracking by year, you can choose to highlight all streams 
-        // or keep your specific layer highlight if 'd' is passed.
-        // streams.attr("opacity", p => p.key === d.key ? 1 : 0.25);
-
-        // 2. Calculate 'mx' mathematically based on the year being focused
         const mx = xScale(year);
         
-        // Move your vertical focus guide line to this position
         focusLine
             .attr("x1", mx)
             .attr("x2", mx)
             .style("visibility", "visible");
 
-        // 3. Find the dataset row for the currently focused year
-        // (Translating your commented out mousemove logic)
         const yearData = stackedData.find(sd => sd.year === year);
         
-        // 4. Update your SVG internal tooltip tspans safely
         tooltipText.selectAll("tspan").remove();
         
         tooltipText.append("tspan")
@@ -241,8 +229,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
             .attr("dy", 0)
             .text(`Year: ${year}`);
             
-        // You can iterate over your layer keys to show all metrics for that year, 
-        // or target a specific one. Here is how to list the metrics for that year:
         let runningYOffset = 16;
         keys.forEach(key => {
             const fineVal = yearData ? (yearData[key] || 0) : 0;
@@ -252,23 +238,17 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
                 .attr("dy", runningYOffset)
                 .text(`${formatMetricLabel(key)}: $${fineVal.toLocaleString()}`);
                 
-            // Reset offset for subsequent lines so they space out correctly
             runningYOffset = 16; 
         });
 
-        // 5. Position the tooltip utilizing your bounding logic
-        // Using the calculated 'mx' instead of a physical mouse pointer!
         const tooltipWidth = 225;
         const tooltipHeight = 70;
         
         let tx = mx + 15;
-        // 'w' is your chart width boundary
         if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15; 
         
-        // We can anchor 'ty' to a stable mid-point height of your stream chart
         let ty = innerHeight / 2 - tooltipHeight / 2; 
 
-        // Smoothly transform your SVG tooltip container to the correct coordinate slot
         tooltip
             .style("visibility", "visible")
             .style("opacity", 1)
@@ -280,52 +260,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         tooltip.style("visibility", "hidden");
     };
 
-    // Hover / mousemove interaction
-    // streams
-    //     .on("mouseover", handleHover)
-    //     .on("focus", handleHover)
-    //     .on("mousemove", function(event, d) {
-    //         const [mx, my] = d3.pointer(event);
-    //         const year = Math.round(xScale.invert(mx));
-            
-    //         // Find value for the current year
-    //         const yearData = stackedData.find(sd => sd.year === year);
-    //         const fineVal = yearData ? (yearData[d.key] || 0) : 0;
-
-    //         tooltipText.selectAll("tspan").remove();
-    //         tooltipText.append("tspan")
-    //             .attr("x", 12)
-    //             .attr("dy", 0)
-    //             .text(`Year: ${year}`);
-    //         tooltipText.append("tspan")
-    //             .attr("x", 12)
-    //             .attr("dy", 16)
-    //             .text(`Metric: ${formatMetricLabel(d.key)}`);
-    //         tooltipText.append("tspan")
-    //             .attr("x", 12)
-    //             .attr("dy", 16)
-    //             .text(`Fines: $${fineVal.toLocaleString()}`);
-
-    //         const tooltipWidth = 225;
-    //         const tooltipHeight = 70;
-    //         let tx = mx + 15;
-    //         if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15;
-    //         let ty = my - tooltipHeight - 10;
-    //         if (ty < 0) ty = my + 15;
-
-    //         tooltip.attr("transform", `translate(${tx}, ${ty})`);
-    //     })
-    //     .on("mouseleave", () => {
-    //         streams.attr("opacity", 1);
-    //         tooltip.style("opacity", 0);
-    //     })
-    //     .on("blur", () => {
-    //         streams.attr("opacity", 1);
-    //         tooltip.style("opacity", 0);
-    //     })
-    //     .on("keydown", (e) => createDataPointMovement(e, streams))
-    //     .on("click", (e) => syncClicksBetweenDPs(e, streams));
-
     yearTrackers
         .on("mouseenter", handleYearFocus)
         .on("focus", handleYearFocus)
@@ -334,7 +268,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .on("keydown", (event) => createDataPointMovement(event, yearTrackers))
         .on("click", (event) => syncClicksBetweenDPs(event, yearTrackers));
 
-    // Interactive Legend (horizontal layout at the bottom)
     if (metrics.length > 1) {
         const legendX = Math.max(10, w / 2 - (metrics.length * 80));
         const legend = chart.append("g")
@@ -381,7 +314,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         (selectedRows, clone) => {
             const cloneChart = d3.select(clone).select("g");
             
-            // Remove existing indicator elements
             cloneChart.selectAll(".year-indicator").remove();
 
             if (!selectedRows || selectedRows.length === 0) {
@@ -392,7 +324,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
                 const xPos = xScale(row.Year);
                 if (isNaN(xPos)) return;
 
-                // Draw vertical dashed line marker at the selected year
                 cloneChart.append("line")
                     .attr("class", "year-indicator")
                     .attr("x1", xPos)
@@ -403,7 +334,6 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
                     .attr("stroke-width", "2px")
                     .attr("stroke-dasharray", "4 4");
 
-                // Add text year label at the top of the line
                 cloneChart.append("text")
                     .attr("class", "year-indicator")
                     .attr("x", xPos)
