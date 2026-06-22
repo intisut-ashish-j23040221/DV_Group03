@@ -20,11 +20,11 @@ const drawKPIs = (data, comparisonData = data) => {
 
     const previousYears = [];
     for (let y = minY - rangeLength; y < minY; y++) {
-        previousYears.push(y);
+        previousYears.push(+y);
     }
 
     const currentYearData = data;
-    const previousYearData = comparisonData.filter(d => previousYears.includes(d.year));
+    const previousYearData = comparisonData.filter(d => previousYears.includes(+d.year));
 
     const latestYearLabel = years.length > 1 ? `${minY}-${maxY}` : String(minY);
     const previousYearLabel = previousYears.length > 1 
@@ -39,7 +39,7 @@ const drawKPIs = (data, comparisonData = data) => {
     
     const avgPercent = totalConducted > 0 ? ((totalPositive / totalConducted) * 100).toFixed(2) : 0;
     const previousAvgPercent = previousTotalConducted > 0 ? ((totalPreviousPositive / previousTotalConducted) * 100) : null;
-    const positivePercentDelta = previousAvgPercent === null ? null : (avgPercent - previousAvgPercent);
+    const positivePercentDelta = previousAvgPercent === null ? null : (+avgPercent - previousAvgPercent);
     const positivePercentTrendText = previousAvgPercent === null
         ? 'N/A vs previous period'
         : `${positivePercentDelta >= 0 ? '▲' : '▼'} ${Math.abs(positivePercentDelta).toFixed(2)}% vs ${previousYearLabel}`;
