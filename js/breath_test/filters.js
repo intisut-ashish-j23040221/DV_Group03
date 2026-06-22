@@ -44,12 +44,21 @@ const initFilters = (data, onChange) => {
     // Individual years options
     years.forEach(year => {
       const yearLabel = document.createElement('label');
+      const inputType = document.createElement('input');
+      const spanText = document.createElement('span');
       yearLabel.className = 'dropdown-item';
-      yearLabel.innerHTML = `
-        <input type="checkbox" value="${year}" class="year-checkbox-item">
-        <span>${year}</span>
-      `;
+      inputType.type = "checkbox";
+      inputType.value = `${year}`;
+      inputType.classList.add("year-checkbox-item");
+      spanText.textContent = `${year}`;
+      yearLabel.appendChild(inputType, spanText);
       yearMenu.appendChild(yearLabel);
+
+      inputType.addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          inputType.click();
+        }
+      })
     });
   };
 
