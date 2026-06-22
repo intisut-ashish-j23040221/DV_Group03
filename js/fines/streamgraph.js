@@ -197,47 +197,64 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
             .style("transform", "translateX(-50%)");
     }
 
-    const handleYearFocus = (event, year) => {
-  
-        const xPosition = xScale(year);
+    const handleYearFocus = (e, year) => {
+        // 1. Highlight the current stream layers based on selection
+        // Note: If you're tracking by year, you can choose to highlight all streams 
+        // or keep your specific layer highlight if 'd' is passed.
+        // streams.attr("opacity", p => p.key === d.key ? 1 : 0.25);
+
+        // 2. Calculate 'mx' mathematically based on the year being focused
+        const mx = xScale(year);
+        
+        // Move your vertical focus guide line to this position
         focusLine
-            .attr("x1", xPosition)
-            .attr("x2", xPosition)
+            .attr("x1", mx)
+            .attr("x2", mx)
             .style("visibility", "visible");
 
-        const yearData = years.filter(d => d.year === year);
+        // 3. Find the dataset row for the currently focused year
+        // (Translating your commented out mousemove logic)
+        const yearData = stackedData.find(sd => sd.year === year);
         
-        // let tooltipHtml = `<strong>Year: ${year}</strong><br/>`;
-        // yearData.forEach(d => {
-        //     tooltipHtml += `${d.category}: ${d.value}<br/>`;
-        // });
-
-        // tooltip.html(tooltipHtml).style("visibility", "visible");
-
-        const svgRect = event.currentTarget.closest("svg").getBoundingClientRect();
-        
-        tooltip
-            .style("left", `${svgRect.left + window.scrollX + xPosition}px`)
-            .style("top", `${svgRect.top + window.scrollY + 50}px`) // Floating near the top of the chart
-            .style("transform", "translateX(-50%)")
-            .style("opacity", 1);
-
-        tooltip.select("rect").attr("fill", colorScale(d.key));
-
+        // 4. Update your SVG internal tooltip tspans safely
         tooltipText.selectAll("tspan").remove();
+        
         tooltipText.append("tspan")
             .attr("x", 12)
             .attr("dy", 0)
-            .text(`Year: ${yearData}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Metric: ${formatMetricLabel(d.key)}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Fines: $${fineVal.toLocaleString()}`);
+            .text(`Year: ${year}`);
+            
+        // You can iterate over your layer keys to show all metrics for that year, 
+        // or target a specific one. Here is how to list the metrics for that year:
+        let runningYOffset = 16;
+        keys.forEach(key => {
+            const fineVal = yearData ? (yearData[key] || 0) : 0;
+            
+            tooltipText.append("tspan")
+                .attr("x", 12)
+                .attr("dy", runningYOffset)
+                .text(`${formatMetricLabel(key)}: $${fineVal.toLocaleString()}`);
+                
+            // Reset offset for subsequent lines so they space out correctly
+            runningYOffset = 16; 
+        });
 
+        // 5. Position the tooltip utilizing your bounding logic
+        // Using the calculated 'mx' instead of a physical mouse pointer!
+        const tooltipWidth = 225;
+        const tooltipHeight = 70;
+        
+        let tx = mx + 15;
+        // 'w' is your chart width boundary
+        if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15; 
+        
+        // We can anchor 'ty' to a stable mid-point height of your stream chart
+        let ty = innerHeight / 2 - tooltipHeight / 2; 
+
+        // Smoothly transform your SVG tooltip container to the correct coordinate slot
+        tooltip
+            .style("visibility", "visible")
+            .attr("transform", `translate(${tx}, ${ty})`);
     };
 
     const handleYearBlur = () => {
