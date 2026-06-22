@@ -207,20 +207,38 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
 
         const yearData = years.filter(d => d.year === year);
         
-        let tooltipHtml = `<strong>Year: ${year}</strong><br/>`;
-        yearData.forEach(d => {
-            tooltipHtml += `${d.category}: ${d.value}<br/>`;
-        });
+        // let tooltipHtml = `<strong>Year: ${year}</strong><br/>`;
+        // yearData.forEach(d => {
+        //     tooltipHtml += `${d.category}: ${d.value}<br/>`;
+        // });
 
-        tooltip.html(tooltipHtml).style("visibility", "visible");
+        // tooltip.html(tooltipHtml).style("visibility", "visible");
 
         const svgRect = event.currentTarget.closest("svg").getBoundingClientRect();
         
         tooltip
             .style("left", `${svgRect.left + window.scrollX + xPosition}px`)
             .style("top", `${svgRect.top + window.scrollY + 50}px`) // Floating near the top of the chart
-            .style("transform", "translateX(-50%)");
-        };
+            .style("transform", "translateX(-50%)")
+            .style("opacity", 1);
+
+        tooltip.select("rect").attr("fill", colorScale(d.key));
+
+        tooltipText.selectAll("tspan").remove();
+        tooltipText.append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Year: ${yearData}`);
+        tooltipText.append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Metric: ${formatMetricLabel(d.key)}`);
+        tooltipText.append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Fines: $${fineVal.toLocaleString()}`);
+
+    };
 
     const handleYearBlur = () => {
         focusLine.style("visibility", "hidden");
