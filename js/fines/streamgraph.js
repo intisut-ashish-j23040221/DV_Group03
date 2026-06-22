@@ -46,7 +46,7 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .offset(d3.stackOffsetNone);
 
     const layers = stack(stackedData);
-    layers.map(l => l.key);
+    const keys = layers.map(l => l.key);
 
     const yScale = d3.scaleLinear()
         .domain([
