@@ -6,6 +6,7 @@ const drawCameraSpeedingBar = (data, metric = 'All') => {
     }
 
     container.selectAll("*").remove();
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     const metricLabel = formatMetricLabel(metric);
 

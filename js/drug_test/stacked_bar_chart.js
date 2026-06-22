@@ -1,6 +1,7 @@
 const drawDrugTrendStackedBar = (data, isInt = false) => {
     const container = d3.select("#drug-trend-line");
     container.html("");
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     if (data.length === 0) return;
 
@@ -68,7 +69,8 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .attr("width", xScale.bandwidth())
         .attr("data-year", d => d.data.year)
         .attr("data-key", d => d.key)
-        .attr("fill", d => colorScale(d.key));
+        .attr("fill", d => colorScale(d.key))
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1"); // keyboard accessible;
 
     const labels = chart.append("g")
         .selectAll("text")
@@ -218,60 +220,68 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    chart.selectAll("rect")
+
+    const handleHover = (e, d) => {
+        const rect = d3.select(e.currentTarget);
+        tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
+        const barX = +rect.attr("x") + xScale.bandwidth() / 2;
+        const barY = +rect.attr("y");
+        const row = d.data;
+
+        tooltipText.selectAll("tspan").remove();
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 0)
+            .text(`Year: ${row.year}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Segment: ${d.key === 'positive' ? 'Positive' : 'Non-positive'}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Total tests: ${d3.format(",.0f")(row.conducted)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive cases: ${d3.format(",.0f")(row.positive)}`);
+        tooltipText
+            .append("tspan")
+            .attr("x", 12)
+            .attr("dy", 16)
+            .text(`Positive rate (%): ${row.percent.toFixed(2)}%`);
+
+        const tooltipWidth = 300;
+        const tooltipHeight = 120;
+        const spaceAbove = barY;
+
+        let tooltipX = barX - tooltipWidth / 2;
+        let tooltipY = spaceAbove > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
+
+        tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
+        tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
+
+        tooltip
+            .style("opacity", 1)
+            .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
+            .style("z-index", 9999);
+    }
+
+
+    let chartType = chart.selectAll("rect")
         .filter(function() { return d3.select(this).attr("data-key"); })
-        .on("mouseenter", (e, d) => {
-            const rect = d3.select(e.currentTarget);
-            tooltip.select('rect').attr('fill', rect.attr('fill') || '#004B87');
-            const barX = +rect.attr("x") + xScale.bandwidth() / 2;
-            const barY = +rect.attr("y");
-            const row = d.data;
-
-            tooltipText.selectAll("tspan").remove();
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 0)
-                .text(`Year: ${row.year}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Segment: ${d.key === 'positive' ? 'Positive' : 'Non-positive'}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Total tests: ${d3.format(",.0f")(row.conducted)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive cases: ${d3.format(",.0f")(row.positive)}`);
-            tooltipText
-                .append("tspan")
-                .attr("x", 12)
-                .attr("dy", 16)
-                .text(`Positive rate (%): ${row.percent.toFixed(2)}%`);
-
-            const tooltipWidth = 300;
-            const tooltipHeight = 120;
-            const spaceAbove = barY;
-
-            let tooltipX = barX - tooltipWidth / 2;
-            let tooltipY = spaceAbove > tooltipHeight + 20 ? barY - tooltipHeight - 10 : barY + 20;
-
-            tooltipX = Math.max(5, Math.min(tooltipX, w - tooltipWidth - 5));
-            tooltipY = Math.max(5, Math.min(tooltipY, innerHeight - tooltipHeight - 5));
-
-            tooltip
-                .style("opacity", 1)
-                .attr("transform", `translate(${tooltipX}, ${tooltipY})`)
-                .style("z-index", 9999);
-        })
-        .on("mouseleave", () => {
-            tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100);
-        });
+    
+    chartType
+        .on("mouseenter", handleHover)
+        .on("focus", handleHover)
+        .on("mouseleave", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("blur", () => tooltip.style("opacity", 0).attr("transform", "translate(0, 500)").style("z-index", 100))
+        .on("keydown", (e) => createDataPointMovement(e, chartType))
+        .on("click", (e) => syncClicksBetweenDPs(e, chartType));
 
     // (Removed) summary-percent text display — not needed in this chart layout
 

@@ -50,13 +50,14 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
 
     const stack = d3.stack()
         .keys(metrics)
-        .offset(d3.stackOffsetSilhouette);
+        .offset(d3.stackOffsetNone);
 
     const layers = stack(stackedData);
+    const keys = layers.map(l => l.key);
 
     const yScale = d3.scaleLinear()
         .domain([
-            d3.min(layers, l => d3.min(l, d => d[0])),
+            0,
             d3.max(layers, l => d3.max(l, d => d[1]))
         ])
         .range([innerHeight, 0])
@@ -123,6 +124,29 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .selectAll("text")
         .style("font-size", "11px");
 
+    // invisible year points
+    const yearTrackers = chart.append("g")
+        .attr("class", "year-trackers")
+        .selectAll("rect")
+        .data(years)
+        .join("rect")
+        .attr("x", year => xScale(year) - (xScale.step ? xScale.step() / 2 : 10)) // center it over the year
+        .attr("y", 0)
+        .attr("width", xScale.step ? xScale.step() : 20)
+        .attr("height", innerHeight)
+        .style("fill", "transparent") // Invisible to the eye!
+        .style("cursor", "pointer")
+        .attr("tabindex", (d, i) => i === 0 ? "0" : "-1")
+
+    const focusLine = chart.append("line")
+        .attr("y1", 0)
+        .attr("y2", innerHeight)
+        .style("stroke", "#ff9800") 
+        .style("stroke-width", "2px")
+        .style("stroke-dasharray", "4 4")
+        .style("visibility", "hidden");
+
+
     // Labels
     chart.append("text")
         .attr("x", w / 2)
@@ -169,47 +193,143 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    // Hover / mousemove interaction
-    streams.on("mouseover", function(event, d) {
+    const handleHover = (e, d) => {
         streams.attr("opacity", p => p.key === d.key ? 1 : 0.25);
         tooltip.style("opacity", 1);
         tooltip.select("rect").attr("fill", colorScale(d.key));
-    })
-    .on("mousemove", function(event, d) {
-        const [mx, my] = d3.pointer(event);
-        const year = Math.round(xScale.invert(mx));
-        
-        // Find value for the current year
-        const yearData = stackedData.find(sd => sd.year === year);
-        const fineVal = yearData ? (yearData[d.key] || 0) : 0;
 
+        const svgElement = e.currentTarget.closest("svg");
+        let resp = svgElement.getBoundingClientRect();
+
+        const [centroidX, centroidY] = path.centroid(d);
+
+        const absoluteX = resp.left + window.scrollX + centroidX;
+        const absoluteY = resp.top + window.scrollY + centroidY;
+
+        tooltip
+            .style("left", `${absoluteX}px`)
+            .style("top", `${absoluteY - 20}px`) 
+            .style("transform", "translateX(-50%)");
+    }
+
+    const handleYearFocus = (e, year) => {
+        // 1. Highlight the current stream layers based on selection
+        // Note: If you're tracking by year, you can choose to highlight all streams 
+        // or keep your specific layer highlight if 'd' is passed.
+        // streams.attr("opacity", p => p.key === d.key ? 1 : 0.25);
+
+        // 2. Calculate 'mx' mathematically based on the year being focused
+        const mx = xScale(year);
+        
+        // Move your vertical focus guide line to this position
+        focusLine
+            .attr("x1", mx)
+            .attr("x2", mx)
+            .style("visibility", "visible");
+
+        // 3. Find the dataset row for the currently focused year
+        // (Translating your commented out mousemove logic)
+        const yearData = stackedData.find(sd => sd.year === year);
+        
+        // 4. Update your SVG internal tooltip tspans safely
         tooltipText.selectAll("tspan").remove();
+        
         tooltipText.append("tspan")
             .attr("x", 12)
             .attr("dy", 0)
             .text(`Year: ${year}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Metric: ${formatMetricLabel(d.key)}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Fines: $${fineVal.toLocaleString()}`);
+            
+        // You can iterate over your layer keys to show all metrics for that year, 
+        // or target a specific one. Here is how to list the metrics for that year:
+        let runningYOffset = 16;
+        keys.forEach(key => {
+            const fineVal = yearData ? (yearData[key] || 0) : 0;
+            
+            tooltipText.append("tspan")
+                .attr("x", 12)
+                .attr("dy", runningYOffset)
+                .text(`${formatMetricLabel(key)}: $${fineVal.toLocaleString()}`);
+                
+            // Reset offset for subsequent lines so they space out correctly
+            runningYOffset = 16; 
+        });
 
+        // 5. Position the tooltip utilizing your bounding logic
+        // Using the calculated 'mx' instead of a physical mouse pointer!
         const tooltipWidth = 225;
         const tooltipHeight = 70;
+        
         let tx = mx + 15;
-        if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15;
-        let ty = my - tooltipHeight - 10;
-        if (ty < 0) ty = my + 15;
+        // 'w' is your chart width boundary
+        if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15; 
+        
+        // We can anchor 'ty' to a stable mid-point height of your stream chart
+        let ty = innerHeight / 2 - tooltipHeight / 2; 
 
-        tooltip.attr("transform", `translate(${tx}, ${ty})`);
-    })
-    .on("mouseleave", function() {
-        streams.attr("opacity", 1);
-        tooltip.style("opacity", 0);
-    });
+        // Smoothly transform your SVG tooltip container to the correct coordinate slot
+        tooltip
+            .style("visibility", "visible")
+            .attr("transform", `translate(${tx}, ${ty})`);
+    };
+
+    const handleYearBlur = () => {
+        focusLine.style("visibility", "hidden");
+        tooltip.style("visibility", "hidden");
+    };
+
+    // Hover / mousemove interaction
+    // streams
+    //     .on("mouseover", handleHover)
+    //     .on("focus", handleHover)
+    //     .on("mousemove", function(event, d) {
+    //         const [mx, my] = d3.pointer(event);
+    //         const year = Math.round(xScale.invert(mx));
+            
+    //         // Find value for the current year
+    //         const yearData = stackedData.find(sd => sd.year === year);
+    //         const fineVal = yearData ? (yearData[d.key] || 0) : 0;
+
+    //         tooltipText.selectAll("tspan").remove();
+    //         tooltipText.append("tspan")
+    //             .attr("x", 12)
+    //             .attr("dy", 0)
+    //             .text(`Year: ${year}`);
+    //         tooltipText.append("tspan")
+    //             .attr("x", 12)
+    //             .attr("dy", 16)
+    //             .text(`Metric: ${formatMetricLabel(d.key)}`);
+    //         tooltipText.append("tspan")
+    //             .attr("x", 12)
+    //             .attr("dy", 16)
+    //             .text(`Fines: $${fineVal.toLocaleString()}`);
+
+    //         const tooltipWidth = 225;
+    //         const tooltipHeight = 70;
+    //         let tx = mx + 15;
+    //         if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15;
+    //         let ty = my - tooltipHeight - 10;
+    //         if (ty < 0) ty = my + 15;
+
+    //         tooltip.attr("transform", `translate(${tx}, ${ty})`);
+    //     })
+    //     .on("mouseleave", () => {
+    //         streams.attr("opacity", 1);
+    //         tooltip.style("opacity", 0);
+    //     })
+    //     .on("blur", () => {
+    //         streams.attr("opacity", 1);
+    //         tooltip.style("opacity", 0);
+    //     })
+    //     .on("keydown", (e) => createDataPointMovement(e, streams))
+    //     .on("click", (e) => syncClicksBetweenDPs(e, streams));
+
+    yearTrackers
+        .on("mouseenter", handleYearFocus)
+        .on("focus", handleYearFocus)
+        .on("mouseleave", handleYearBlur)
+        .on("blur", handleYearBlur)
+        .on("keydown", (event) => createDataPointMovement(event, yearTrackers))
+        .on("click", (event) => syncClicksBetweenDPs(event, yearTrackers));
 
     // Interactive Legend (horizontal layout at the bottom)
     if (metrics.length > 1) {

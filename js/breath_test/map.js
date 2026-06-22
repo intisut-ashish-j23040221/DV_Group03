@@ -125,8 +125,6 @@ const drawPositiveBreathBar = async (data) => {
             .style("left", `${absoluteX}px`)
             .style("top", `${absoluteY - 20}px`) 
             .style("transform", "translateX(-50%)");
-
-        // tooltip.style("top", (resp.top + window.scrollY) + "px").style("left", (resp.left + window.scrollY - tooltip.node().offsetWidth) + "px");
     }
 
     states
