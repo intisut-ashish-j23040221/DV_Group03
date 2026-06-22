@@ -43,13 +43,13 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
 
     const stack = d3.stack()
         .keys(metrics)
-        .offset(d3.stackOffsetSilhouette);
+        .offset(d3.stackOffsetNone);
 
     const layers = stack(stackedData);
 
     const yScale = d3.scaleLinear()
         .domain([
-            d3.min(layers, l => d3.min(l, d => d[0])),
+            0
             d3.max(layers, l => d3.max(l, d => d[1]))
         ])
         .range([innerHeight, 0])
@@ -155,47 +155,70 @@ const drawFinesStreamgraph = (data, metric = 'All') => {
         .style("font-weight", "bold")
         .style("font-size", "12px");
 
-    // Hover / mousemove interaction
-    streams.on("mouseover", function(event, d) {
+    const handleHover = (e, d) => {
         streams.attr("opacity", p => p.key === d.key ? 1 : 0.25);
         tooltip.style("opacity", 1);
         tooltip.select("rect").attr("fill", colorScale(d.key));
-    })
-    .on("mousemove", function(event, d) {
-        const [mx, my] = d3.pointer(event);
-        const year = Math.round(xScale.invert(mx));
-        
-        // Find value for the current year
-        const yearData = stackedData.find(sd => sd.year === year);
-        const fineVal = yearData ? (yearData[d.key] || 0) : 0;
 
-        tooltipText.selectAll("tspan").remove();
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 0)
-            .text(`Year: ${year}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Metric: ${formatMetricLabel(d.key)}`);
-        tooltipText.append("tspan")
-            .attr("x", 12)
-            .attr("dy", 16)
-            .text(`Fines: $${fineVal.toLocaleString()}`);
+        const svgElement = e.currentTarget.closest("svg");
+        let resp = svgElement.getBoundingClientRect();
 
-        const tooltipWidth = 225;
-        const tooltipHeight = 70;
-        let tx = mx + 15;
-        if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15;
-        let ty = my - tooltipHeight - 10;
-        if (ty < 0) ty = my + 15;
+        const [centroidX, centroidY] = path.centroid(d);
 
-        tooltip.attr("transform", `translate(${tx}, ${ty})`);
-    })
-    .on("mouseleave", function() {
-        streams.attr("opacity", 1);
-        tooltip.style("opacity", 0);
-    });
+        const absoluteX = resp.left + window.scrollX + centroidX;
+        const absoluteY = resp.top + window.scrollY + centroidY;
+
+        tooltip
+            .style("left", `${absoluteX}px`)
+            .style("top", `${absoluteY - 20}px`) 
+            .style("transform", "translateX(-50%)");
+    }
+
+    // Hover / mousemove interaction
+    streams
+        .on("mouseover", handleHover)
+        .on("focus", handleHover)
+        .on("mousemove", function(event, d) {
+            const [mx, my] = d3.pointer(event);
+            const year = Math.round(xScale.invert(mx));
+            
+            // Find value for the current year
+            const yearData = stackedData.find(sd => sd.year === year);
+            const fineVal = yearData ? (yearData[d.key] || 0) : 0;
+
+            tooltipText.selectAll("tspan").remove();
+            tooltipText.append("tspan")
+                .attr("x", 12)
+                .attr("dy", 0)
+                .text(`Year: ${year}`);
+            tooltipText.append("tspan")
+                .attr("x", 12)
+                .attr("dy", 16)
+                .text(`Metric: ${formatMetricLabel(d.key)}`);
+            tooltipText.append("tspan")
+                .attr("x", 12)
+                .attr("dy", 16)
+                .text(`Fines: $${fineVal.toLocaleString()}`);
+
+            const tooltipWidth = 225;
+            const tooltipHeight = 70;
+            let tx = mx + 15;
+            if (tx + tooltipWidth > w) tx = mx - tooltipWidth - 15;
+            let ty = my - tooltipHeight - 10;
+            if (ty < 0) ty = my + 15;
+
+            tooltip.attr("transform", `translate(${tx}, ${ty})`);
+        })
+        .on("mouseleave", () => {
+            streams.attr("opacity", 1);
+            tooltip.style("opacity", 0);
+        })
+        .on("blur", () => {
+            streams.attr("opacity", 1);
+            tooltip.style("opacity", 0);
+        })
+        .on("keydown", (e) => createDataPointMovement(e, streams))
+        .on("click", (e) => syncClicksBetweenDPs(e, streams));
 
     // Interactive Legend (horizontal layout at the bottom)
     if (metrics.length > 1) {

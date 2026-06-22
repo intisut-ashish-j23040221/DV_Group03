@@ -5,6 +5,7 @@ const drawJurisdictionDrugBar = (data) => {
         return;
     }
     container.html(""); // Clear previous
+    container.attr("tabindex", "0"); // for keyboard accessibility
 
     if (data.length === 0) return;
 

@@ -6,6 +6,7 @@ const drawPositiveDrugBar = async (data) => {
 
     if (data.length === 0) {
         container.html("");
+        container.attr("tabindex", "0"); // for keyboard accessibility
         return;
     }
 
@@ -139,6 +140,8 @@ const drawPositiveDrugBar = async (data) => {
             d3.select(e.currentTarget).attr("stroke", "#ffffff").attr("stroke-width", "1px");
             tooltip.style("visibility", "hidden");
         })
+        .on("keydown", (e) => createDataPointMovement(e, states))
+        .on("click", (e) => syncClicksBetweenDPs(e, states));
         
 
     // Legend
