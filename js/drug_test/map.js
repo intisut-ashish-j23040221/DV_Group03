@@ -175,10 +175,13 @@ const drawPositiveDrugMap = async (data) => {
                 d3.select(clone).selectAll('path').style('fill-opacity', 1);
                 return;
             }
+            const activeJurs = Array.isArray(row)
+                ? row.map(r => r.Jurisdiction)
+                : [row.Jurisdiction];
             d3.select(clone).selectAll('path')
                 .style('fill-opacity', function() {
                     const stateName = d3.select(this).attr('data-jurisdiction');
-                    return stateName === row.Jurisdiction ? 1 : 0.2;
+                    return activeJurs.includes(stateName) ? 1 : 0.2;
                 });
         }
     );

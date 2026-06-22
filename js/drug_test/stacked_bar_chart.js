@@ -296,12 +296,14 @@ const drawDrugTrendStackedBar = (data, isInt = false) => {
         () => ['Year', 'Total Drug Tests Conducted', 'Positive Cases', 'Non-positive Cases', 'Positive Rate (%)'],
         'Drug Tests Conducted vs Positive Results',
         'Displays drug tests conducted by year with positive and non-positive segments stacked together. Positive Rate (%) is calculated as (Positive Cases ÷ Total Drug Tests Conducted) × 100.',
-        (selectedRows, clone) => {
-            if (!selectedRows || selectedRows.length === 0) {
+        (row, clone) => {
+            if (!row) {
                 d3.select(clone).selectAll('rect').attr('opacity', 1);
                 return;
             }
-            const activeYears = selectedRows.map(r => String(r.Year));
+            const activeYears = Array.isArray(row)
+                ? row.map(r => String(r.Year))
+                : [String(row.Year)];
             d3.select(clone).selectAll('rect')
                 .attr('opacity', function() {
                     return activeYears.includes(d3.select(this).attr('data-year')) ? 1 : 0.2;

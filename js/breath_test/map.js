@@ -173,10 +173,13 @@ const drawPositiveBreathMap = async (data) => {
                 d3.select(clone).selectAll('path').style('fill-opacity', 1);
                 return;
             }
+            const activeJurs = Array.isArray(row)
+                ? row.map(r => r.Jurisdiction)
+                : [row.Jurisdiction];
             d3.select(clone).selectAll('path')
                 .style('fill-opacity', function() {
                     const jurCode = d3.select(this).attr('data-jurisdiction');
-                    return jurCode === row.Jurisdiction ? 1 : 0.2;
+                    return activeJurs.includes(jurCode) ? 1 : 0.2;
                 });
         }
     );

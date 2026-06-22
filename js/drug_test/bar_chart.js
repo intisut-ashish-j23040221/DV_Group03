@@ -195,9 +195,12 @@ const drawJurisdictionDrugBar = (data) => {
                 d3.select(clone).selectAll('.bar').attr('opacity', 1);
                 return;
             }
+            const activeJurs = Array.isArray(row)
+                ? row.map(r => r.Jurisdiction)
+                : [row.Jurisdiction];
             d3.select(clone).selectAll('.bar')
                 .attr('opacity', function() {
-                    return d3.select(this).attr('data-jurisdiction') === row.Jurisdiction ? 1 : 0.2;
+                    return activeJurs.includes(d3.select(this).attr('data-jurisdiction')) ? 1 : 0.2;
                 });
         }
     );
