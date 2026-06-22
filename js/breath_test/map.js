@@ -1,6 +1,6 @@
 let australiaGeoJSON = null;
 
-const drawPositiveBreathBar = async (data) => {
+const drawPositiveBreathMap = async (data) => {
     const container = d3.select("#percent-breath-bar");
     container.html("<div style='text-align:center; padding: 20px;'>Loading Map...</div>");
     container.attr("tabindex", "0");

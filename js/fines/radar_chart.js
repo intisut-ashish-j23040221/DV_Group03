@@ -1,4 +1,4 @@
-const drawCameraSpeedingBar = (data, metric = 'All') => {
+const drawCameraSpeedingRadar = (data, metric = 'All') => {
     const container = d3.select("#camera-speeding-bar");
 
     if (container.empty()) {

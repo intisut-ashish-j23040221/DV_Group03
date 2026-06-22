@@ -1,6 +1,6 @@
 let australiaGeoJSON_DT = null;
 
-const drawPositiveDrugBar = async (data) => {
+const drawPositiveDrugMap = async (data) => {
     const container = d3.select("#positive-drug-bar");
     container.html("<div style='text-align:center; padding: 20px;'>Loading Map...</div>");
 

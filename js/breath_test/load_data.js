@@ -78,7 +78,7 @@ Promise.all([
         drawKPIs(filtered, comparisonData);
         drawJurisdictionBreathBar(filtered);
         drawBreathTrendStackedBar(filtered);
-        drawPositiveBreathBar(filtered);
+        drawPositiveBreathMap(filtered);
     };
 
     // Initial render

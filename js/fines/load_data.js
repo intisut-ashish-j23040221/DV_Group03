@@ -70,7 +70,7 @@ Promise.all([
 
         if (typeof drawKPIs === 'function') drawKPIs(filtered, comparisonData, selectedMetric);
         drawJurisdictionSpeedingMap(filtered, selectedMetric);
-        drawCameraSpeedingBar(filtered, selectedMetric);
+        drawCameraSpeedingRadar(filtered, selectedMetric);
         drawFinesStreamgraph(filtered, selectedMetric);
         drawLocationStackedBar(filtered, selectedMetric);
         drawLocationHeatmap(filtered, selectedMetric);
